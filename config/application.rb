@@ -15,6 +15,8 @@ module SlashHeroku
       g.orm :active_record, primary_key_type: :uuid
     end
 
+    config.active_job.queue_name_prefix = "slash-heroku-#{Rails.env}"
+
     config.active_job.queue_adapter = :sidekiq
 
     config.generators do |g|
