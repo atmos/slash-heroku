@@ -83,7 +83,14 @@ class Command < ApplicationRecord
   def authenticate_heroku_response
     {
       response_type: "in_channel",
-      text: "Please <#{slack_auth_url}|sign in to Heroku>."
+      text: "Please <#{slack_auth_url}|Sign in to Heroku>."
+    }
+  end
+
+  def authenticate_github_response
+    {
+      response_type: "in_channel",
+      text: "Please <#{github_auth_url}|Sign in to GitHub>."
     }
   end
 

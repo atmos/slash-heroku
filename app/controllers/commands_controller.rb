@@ -3,11 +3,18 @@ class CommandsController < ApplicationController
   instrument_action :create
   protect_from_forgery with: :null_session
 
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/PerceivedComplexity
   def create
     if slack_token_valid?
       if current_user && current_user.heroku_token
-        command = current_user.create_command_for(params)
-        render json: command.default_response.to_json
+        if current_user.github_token
+          command = current_user.create_command_for(params)
+          render json: command.default_response.to_json
+        else
+          command = Command.from_params(params)
+          render json: command.authenticate_github_response
+        end
       else
         command = Command.from_params(params)
         render json: command.authenticate_heroku_response
@@ -16,6 +23,8 @@ class CommandsController < ApplicationController
       render json: {}, status: 404
     end
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/PerceivedComplexity
 
   private
 

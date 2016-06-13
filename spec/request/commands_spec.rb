@@ -20,7 +20,7 @@ RSpec.describe "SlashHeroku /commands", type: :request do
 
     link = "Please <https://www.example.com/auth/slack?origin=" \
            "#{Command.last.encoded_origin_hash}&team=T123YG08V|" \
-           "sign in to Heroku>."
+           "Sign in to Heroku>."
     expect(response_body["text"]).to eql(link)
   end
 
