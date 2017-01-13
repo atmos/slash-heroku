@@ -8,8 +8,7 @@ module HerokuCommands
     def self.help_documentation
       [
         "releases -a APP - Display the last 10 releases for APP.",
-        "releases:info RELEASE - View detailed information for a release.",
-        "releases:rollback RELEASE - Roll back to an older release."
+        "releases:info RELEASE -a APP - View detailed information for a release"
       ]
     end
 

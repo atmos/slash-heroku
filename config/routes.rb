@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   get  "/boomtown" => "application#boomtown"
 
   post "/commands" => "commands#create"
+  post "/message_actions"  => "message_actions#create"
   post "/signout"  => "sessions#destroy"
 
   mount Sidekiq::Web => "/sidekiq", constraints: AdminConstraint.new

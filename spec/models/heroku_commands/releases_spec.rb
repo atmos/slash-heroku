@@ -101,13 +101,4 @@ RSpec.describe HerokuCommands::Releases, type: :model do
       verify_release(command.response)
     end
   end
-
-  it "has a release:rollback -a command" do
-    id = "49d3122d-f273-4e34-afec-337a8b107e48"
-    heroku_handler_for("releases:rollback #{id} -a atmos-dot-org")
-
-    pending "releases:rollback is unimplemented"
-
-    raise ArgumentError, "releases:rollback is unimplemented"
-  end
 end

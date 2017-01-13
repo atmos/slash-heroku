@@ -35,12 +35,6 @@ class DeploymentReaperJob < ApplicationJob
       payload[:state] = "success" if info["status"] == "succeeded"
 
       pipeline.create_deployment_status(deployment_url, payload)
-
-      handler = command.handler
-      if handler
-        response = handler.deployment_complete_message(payload, sha)
-        command.postback_message(response)
-      end
     elsif command.created_at > 15.minutes.ago
       DeploymentReaperJob.set(wait: 10.seconds).perform_later(args)
     else

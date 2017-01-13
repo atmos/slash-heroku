@@ -5,6 +5,7 @@ class User < ApplicationRecord
   include HerokuTokenManagement
 
   has_many :commands, dependent: :destroy
+  has_many :message_actions, dependent: :destroy
 
   def self.omniauth_user_data(omniauth_info)
     token = omniauth_info[:credentials][:token]
@@ -54,5 +55,28 @@ class User < ApplicationRecord
     CommandExecutorJob.perform_later(command_id: command.id)
     YubikeyExpireJob.set(wait: 10.seconds).perform_later(command_id: command.id)
     command
+  end
+
+  def create_message_action_for(params)
+    channel = params[:channel]
+    team = params[:team]
+    action = create_message_action_for_team_and_channel(team, channel, params)
+    MessageActionExecutorJob.perform_later(action_id: action.id)
+    action
+  end
+
+  def create_message_action_for_team_and_channel(team, channel, params)
+    button_clicked = params[:actions][0]
+    message_actions.create(
+      action_ts: params[:action_ts],
+      callback_id: params[:callback_id],
+      channel_id: channel[:id],
+      channel_name: channel[:name],
+      message_ts: params[:message_ts],
+      response_url: params[:response_url],
+      team_domain: team[:domain],
+      team_id: team[:id],
+      value: button_clicked[:value]
+    )
   end
 end

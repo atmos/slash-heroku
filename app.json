@@ -64,6 +64,9 @@
       "description": "Unique token for signing cookies. This is generated.",
       "generator": "secret"
     },
+    "RBNACL_SECRET": {
+      "description": "The secret used for writing encrypted values to the database. Generate with 'dd if=/dev/urandom bs=32 count=1 2>/dev/null | openssl base64'."
+    },
     "REDIS_URL": {
       "description": "The URL for the Heroku Redis install that sidekiq uses. Leave this alone.",
       "value": "redis://"

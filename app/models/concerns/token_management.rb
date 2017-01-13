@@ -40,35 +40,7 @@ module TokenManagement
   end
   class UserRefreshFailure < StandardError; end
 
-  def fernet_decrypt_value(value)
-    Fernet.verifier(self.class.fernet_secret, value).message
-  rescue Fernet::Token::InvalidToken, NoMethodError
-    nil
-  end
-
-  def fernet_encrypt_value(value)
-    Fernet.generate(self.class.fernet_secret, value)
-  end
-
-  def rbnacl_reset
-    @rbnacl_simple_box = nil
-  end
-
-  def rbnacl_simple_box
-    @rbnacl_simple_box ||=
-      RbNaCl::SimpleBox.from_secret_key(self.class.fernet_secret_bytes)
-  end
-
-  def rbnacl_encrypt_value(value)
-    return if value.blank?
-    Base64.encode64(rbnacl_simple_box.encrypt(value)).chomp
-  end
-
-  def rbnacl_decrypt_value(value)
-    rbnacl_simple_box.decrypt(Base64.decode64(value))
-  rescue RbNaCl::CryptoError, NoMethodError
-    nil
-  end
+  include CoalCar::AttributeEncryption
 
   def refresh_oauth_tokens
     refresh_heroku_oauth_token

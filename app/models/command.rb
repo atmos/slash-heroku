@@ -22,26 +22,20 @@ class Command < ApplicationRecord
     postback_message(handler.response)
   end
 
-  # rubocop:disable Metrics/CyclomaticComplexity
   def handler
     @handler ||= case task
                  when "auth"
                    HerokuCommands::Auth.new(self)
                  when "deploy"
                    HerokuCommands::Deploy.new(self)
-                 when "logs"
-                   HerokuCommands::Logs.new(self)
                  when "pipeline", "pipelines"
                    HerokuCommands::Pipelines.new(self)
                  when "releases"
                    HerokuCommands::Releases.new(self)
-                 when "where", "wcid"
-                   HerokuCommands::Where.new(self)
                  else # when "help"
                    HerokuCommands::Help.new(self)
                  end
   end
-  # rubocop:enable Metrics/CycolmaticComplexity
 
   def description
     if application

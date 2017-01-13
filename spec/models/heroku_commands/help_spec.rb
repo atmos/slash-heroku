@@ -21,7 +21,7 @@ RSpec.describe HerokuCommands::Help, type: :model do
       .to eql("Help commands from the heroku integration")
     expect(attachment[:pretext])
       .to eql("Run /h help releases for task specific help")
-    expect(attachment[:text].split("\n").size).to eql(10)
+    expect(attachment[:text].split("\n").size).to eql(7)
     expect(attachment[:title])
       .to eql("Available heroku help commands:")
     expect(attachment[:title_link])

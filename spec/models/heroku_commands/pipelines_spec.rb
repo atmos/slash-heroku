@@ -18,6 +18,35 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     command.handler
   end
 
+  it "lists available pipelines" do
+    command = heroku_handler_for("pipelines")
+    command.user.github_token = SecureRandom.hex(24)
+    command.user.save
+
+    response_info = fixture_data("api.heroku.com/account/info")
+    stub_request(:get, "https://api.heroku.com/account")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/pipelines/info")
+    stub_request(:get, "https://api.heroku.com/pipelines")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    expect(command.task).to eql("pipelines")
+    expect(command.subtask).to eql("default")
+    expect(command.application).to be_nil
+
+    command.run
+
+    expect(command.response[:response_type]).to be_nil
+    expect(command.response[:attachments].size).to eql(1)
+    attachment = command.response[:attachments].first
+    expect(attachment[:text]).to eql(
+      "You can deploy: hubot, slash-heroku."
+    )
+  end
+
   # rubocop:disable Metrics/LineLength
   it "has a pipeline:info command" do
     command = heroku_handler_for("pipelines:info -a hubot")

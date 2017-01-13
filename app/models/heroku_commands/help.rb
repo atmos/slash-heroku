@@ -9,10 +9,8 @@ module HerokuCommands
       [
         HerokuCommands::Auth.help_documentation,
         HerokuCommands::Deploy.help_documentation,
-        HerokuCommands::Logs.help_documentation,
         HerokuCommands::Pipelines.help_documentation,
-        HerokuCommands::Releases.help_documentation,
-        HerokuCommands::Where.help_documentation
+        HerokuCommands::Releases.help_documentation
       ].flatten
     end
 

@@ -13,26 +13,15 @@ module HerokuTokenManagement
     self.heroku_email = nil
     self.enc_heroku_token = nil
     self.enc_heroku_refresh_token = nil
-    self.nacl_enc_heroku_token = nil
-    self.nacl_enc_heroku_refresh_token = nil
     self.heroku_expires_at = nil
   end
 
   def heroku_refresh_token
-    fernet_heroku_refresh_token
-  end
-
-  def fernet_heroku_refresh_token
-    fernet_decrypt_value(self[:enc_heroku_refresh_token])
-  end
-
-  def rbnacl_heroku_refresh_token
-    rbnacl_decrypt_value(self[:nacl_enc_heroku_refresh_token])
+    decrypt_value(self[:enc_heroku_refresh_token])
   end
 
   def heroku_refresh_token=(token)
-    self[:nacl_enc_heroku_refresh_token] = rbnacl_encrypt_value(token)
-    self[:enc_heroku_refresh_token] = fernet_encrypt_value(token)
+    self[:enc_heroku_refresh_token] = encrypt_value(token)
   end
 
   def heroku_configured?
@@ -40,16 +29,11 @@ module HerokuTokenManagement
   end
 
   def heroku_token=(token)
-    self[:nacl_enc_heroku_token] = rbnacl_encrypt_value(token)
-    self[:enc_heroku_token] = fernet_encrypt_value(token)
-  end
-
-  def fernet_heroku_token
-    fernet_decrypt_value(self[:enc_heroku_token])
+    self[:enc_heroku_token] = encrypt_value(token)
   end
 
   def rbnacl_heroku_token
-    rbnacl_decrypt_value(self[:nacl_enc_heroku_token])
+    decrypt_value(self[:enc_heroku_token])
   end
 
   # This will refresh the token if expired.
@@ -62,7 +46,7 @@ module HerokuTokenManagement
     if heroku_expired?
       refresh_heroku_oauth_token
     end
-    fernet_heroku_token
+    rbnacl_heroku_token
   end
 
   def heroku_expired?
