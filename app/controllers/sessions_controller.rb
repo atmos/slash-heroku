@@ -60,7 +60,10 @@ class SessionsController < ApplicationController
       @after_success_url = decoded[:uri] if decoded[:uri] =~ /^slack:/
 
       command = Command.find(decoded[:token])
-      SignupCompleteJob.perform_later(command_id: command.id) if command
+      if command
+        SignupCompleteJob.perform_later(user_id: session[:user_id],
+                                        command_id: command.id)
+      end
     end
   rescue StandardError, ActiveRecord::RecordNotFound
     nil

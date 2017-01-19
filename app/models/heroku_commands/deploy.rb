@@ -1,8 +1,6 @@
 module HerokuCommands
   # Class for handling Deployment requests
   class Deploy < HerokuCommand
-    include PipelineResponse
-
     attr_reader :info
     delegate :application, :branch, :forced, :hosts, :second_factor, to: :@info
 
@@ -27,8 +25,47 @@ module HerokuCommands
       @environment ||= info.environment || pipeline.default_environment
     end
 
+    def default_heroku_application
+      @default_heroku_application ||=
+        pipeline.default_heroku_application(environment)
+    end
+
+    def custom_payload
+      {
+        notify: {
+          room: command.channel_name,
+          user: command.user.slack_user_id,
+          team_id: command.team_id,
+          user_name: command.user.slack_user_name
+        }
+      }
+    end
+
+    def command_expired?
+      command.created_at < 60.seconds.ago
+    end
+
+    def handle_locked_application(error)
+      CommandExecutorJob
+        .set(wait: 0.5.seconds)
+        .perform_later(command_id: command.id) unless command_expired?
+
+      if command.processed_at.nil?
+        error_response_for_escobar(error)
+      else
+        {}
+      end
+    end
+
+    def reap_heroku_build(heroku_build)
+      DeploymentReaperJob
+        .set(wait: 10.seconds)
+        .perform_later(heroku_build.to_job_json)
+      {}
+    end
+
     def deploy_application
-      if application && !pipelines[application]
+      if application && !pipeline
         response_for("Unable to find a pipeline called #{application}")
       else
         DeploymentRequest.process(self)
@@ -42,7 +79,7 @@ module HerokuCommands
     def run_on_subtask
       case subtask
       when "default"
-        if pipelines
+        if pipeline
           deploy_application
         else
           response_for("You're not authenticated with GitHub yet. " \
@@ -60,6 +97,10 @@ module HerokuCommands
     def repository_markup(deploy)
       name_with_owner = deploy.github_repository
       "<https://github.com/#{name_with_owner}|#{name_with_owner}>"
+    end
+
+    def pipeline
+      user.pipeline_for(application)
     end
   end
 end

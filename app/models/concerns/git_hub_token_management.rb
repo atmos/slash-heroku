@@ -73,6 +73,6 @@ module GitHubTokenManagement
   end
 
   def github_configured?
-    self[:enc_github_token] && !self[:enc_github_token].empty?
+    !(github_token && !github_token.empty?).nil?
   end
 end

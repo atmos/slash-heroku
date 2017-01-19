@@ -2,60 +2,68 @@
   "name": "SlashHeroku",
   "logo": "https://cloud.githubusercontent.com/assets/704696/3822434/60e8b060-1d25-11e4-9baf-7fdb7f467e2b.gif",
   "description": "Run the heroku toolbelt from Slack.",
-
   "keywords": [
     "heroku",
     "slack",
     "slash command",
     "chatops"
   ],
-
   "website": "http://github.com/atmos/slash-heroku",
   "repository": "https://github.com/atmos/slash-heroku",
   "success_url": "/install",
-  "addons": ["heroku-postgresql", "heroku-redis"],
+  "addons": [
+    "heroku-postgresql",
+    "heroku-redis"
+  ],
   "env": {
     "APP_NAME": {
       "description": "The application name used by the coal_car gem for identifying this app",
       "value": "slash-heroku"
     },
-    "FERNET_SECRET": {
-      "description": "The secret used for writing encrypted values to the database. Generate with 'dd if=/dev/urandom bs=32 count=1 2>/dev/null | openssl base64'."
-    },
     "GITHUB_ADMIN_LOGINS": {
-      "description": "A comma delimited list of GitHub logins that can access sidekiq-web"
+      "description": "A comma delimited list of GitHub logins that can access sidekiq-web",
+      "value": "atmos,ys,stellacotton"
     },
     "GITHUB_OAUTH_ID": {
-      "description": "The GitHub OAuth client id for being an OAuth consumer"
+      "description": "The GitHub OAuth client id for being an OAuth consumer",
+      "required": false
     },
     "GITHUB_OAUTH_SECRET": {
-      "description": "The GitHub OAuth client secret for being an OAuth consumer"
+      "description": "The GitHub OAuth client secret for being an OAuth consumer",
+      "required": false
     },
     "HEROKU_OAUTH_ID": {
-      "description": "The Heroku OAuth client id for being an OAuth consumer"
+      "description": "The Heroku OAuth client id for being an OAuth consumer",
+      "required": false
     },
     "HEROKU_OAUTH_SECRET": {
-      "description": "The Heroku OAuth client secret for being an OAuth consumer"
+      "description": "The Heroku OAuth client secret for being an OAuth consumer",
+      "required": false
     },
     "HOSTNAME": {
-      "description": "The full hostname that the application is running at."
+      "description": "The full hostname that the application is running at.",
+      "value": "slash-heroku.atmos.org"
     },
     "LIBRATO_PASSWORD": {
-      "description": "The password for your librato integration."
+      "description": "The password for your librato integration.",
+      "required": false
     },
     "LIBRATO_SOURCE": {
-      "description": "The source prefix for your librato integration."
+      "description": "The source prefix for your librato integration.",
+      "required": false
     },
     "LIBRATO_TOKEN": {
-      "description": "The token for your librato integration."
+      "description": "The token for your librato integration.",
+      "required": false
     },
     "LIBRATO_USER": {
-      "description": "The user email for your librato integration."
+      "description": "The user email for your librato integration.",
+      "required": false
     },
     "PRIVACY_POLICY_URL": {
-      "description": "The url of your privacy policy."
+      "description": "The url of your privacy policy.",
+      "value": "https://github.com/atmos/slash-heroku/blob/master/PRIVACY.md"
     },
-
     "RAILS_ENV": {
       "description": "This is what the RAILS_ENV unix environmental variable is set to.",
       "value": "production"
@@ -65,43 +73,45 @@
       "generator": "secret"
     },
     "RBNACL_SECRET": {
-      "description": "The secret used for writing encrypted values to the database. Generate with 'dd if=/dev/urandom bs=32 count=1 2>/dev/null | openssl base64'."
+      "description": "The secret used for writing encrypted values to the database. Generate with 'dd if=/dev/urandom bs=32 count=1 2>/dev/null | openssl base64'.",
+      "required": false
     },
     "REDIS_URL": {
       "description": "The URL for the Heroku Redis install that sidekiq uses. Leave this alone.",
       "value": "redis://"
-
     },
     "ROLLBAR_ACCESS_TOKEN": {
-      "description": "The token for your rollbar project."
+      "description": "The token for your rollbar project.",
+      "required": false
     },
     "SLACK_APP_URL": {
-      "description": "The direct link to your app in the Slack App Store"
+      "description": "The direct link to your app in the Slack App Store",
+      "value": "https://slack.com/apps/A0YJZJA3E-heroku-chatops-for-slack-beta"
     },
     "SLACK_OAUTH_ID": {
-      "description": "The Slack OAuth client id for being an OAuth consumer"
+      "description": "The Slack OAuth client id for being an OAuth consumer",
+      "required": false
     },
     "SLACK_OAUTH_SECRET": {
-      "description": "The Slack OAuth client secret for being an OAuth consumer"
+      "description": "The Slack OAuth client secret for being an OAuth consumer",
+      "required": false
     },
     "SLACK_SLASH_COMMAND_TOKEN": {
-      "description": "The token from slack to ensure it's a valid incoming request"
+      "description": "The token from slack to ensure it's a valid incoming request",
+      "required": false
     },
     "YUBIEXPIRE_HOSTNAME": {
-      "description": "The hostname to post keys to to ensure everything gets invalidated at some point."
+      "description": "The hostname to post keys to to ensure everything gets invalidated at some point.",
+      "required": false
     },
     "KOLKRABBI_HOSTNAME": {
       "description": "The hostname for Heroku's kolkrabbi service. Leave this alone.",
       "value": "kolkrabbi.heroku.com"
     }
   },
-  "formation": [
-    { "process": "web",    "quantity": 1 },
-    { "process": "worker", "quantity": 1 }
-  ],
   "scripts": {
-    "postdeploy": "bundle exec rake db:migrate"
-  },
-  "buildpacks": [
-  ]
+    "postdeploy": "bundle exec rake db:migrate",
+    "test-setup": "bundle install --with test",
+    "test": "bin/cibuild"
+  }
 }

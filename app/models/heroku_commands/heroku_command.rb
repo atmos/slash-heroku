@@ -65,15 +65,26 @@ module HerokuCommands
     end
 
     def error_response_for_escobar(error)
+      Rails.logger.info source: :escobar, error: error.message
       case error.message
       when /Commit status checks failed/i
         error_response_for_escobar_failed_commit_statuses(error)
       when /requires second factor/i
         error_response_for_escobar_two_factor(error)
       else
+        Raven.capture_exception(error)
         Rails.logger.info source: :escobar, error: error.message
         {}
       end
+    end
+
+    def error_response_for_escobar_failed_commit_statuses(error)
+      {
+        response_type: "in_channel",
+        attachments: [
+          { text: error.message }
+        ]
+      }
     end
 
     def response_for(text)

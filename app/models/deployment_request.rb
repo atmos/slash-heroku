@@ -39,7 +39,7 @@ class DeploymentRequest
   end
 
   def pipeline
-    @pipeline ||= command.pipelines[application]
+    @pipeline ||= command.pipeline
   end
 
   def heroku_application
@@ -83,6 +83,7 @@ class DeploymentRequest
   rescue Escobar::Heroku::BuildRequest::Error => e
     handle_escobar_exception(e)
   rescue StandardError => e
+    Raven.capture_exception(e)
     command.error_response_for(e.message)
   end
   # rubocop:enable Metrics/AbcSize

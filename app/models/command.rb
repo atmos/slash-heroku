@@ -101,7 +101,7 @@ class Command < ApplicationRecord
       request.headers["Content-Type"] = "application/json"
     end
 
-    Rails.logger.info response.body
+    Rails.logger.info action: "command#postback_message", body: response.body
   rescue StandardError => e
     Rails.logger.info "Unable to post back to slack: '#{e.inspect}'"
   end

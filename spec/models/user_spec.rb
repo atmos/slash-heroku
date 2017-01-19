@@ -1,8 +1,9 @@
 require "rails_helper"
 
 RSpec.describe User, type: :model do
+  let(:user) { create_atmos }
+
   it "creates action made by the user" do
-    user = create_atmos
     expect do
       params = action_params_for("environment", "staging")
       user.create_message_action_for(params)
@@ -16,5 +17,28 @@ RSpec.describe User, type: :model do
     expect(action.channel_name).to eql("general")
     expect(action.action_ts).to eql("1480454458.026997")
     expect(action.message_ts).to eql("1480454212.000005")
+  end
+
+  describe "onboarding" do
+    it "requires a non-empty github_token" do
+      user.github_token = SecureRandom.hex(24)
+
+      expect(user).to be_github_configured
+      expect(user).to_not be_onboarded
+    end
+
+    it "require a non-empty heroku_token" do
+      user.heroku_token = SecureRandom.hex(24)
+
+      expect(user).to be_heroku_configured
+      expect(user).to_not be_onboarded
+    end
+
+    it "is complete if a github and heroku are configured" do
+      user.heroku_token = SecureRandom.hex(24)
+      user.github_token = SecureRandom.hex(24)
+
+      expect(user).to be_onboarded
+    end
   end
 end

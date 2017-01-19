@@ -23,7 +23,10 @@ RSpec.describe HerokuCommands::Auth, type: :model do
     expect(command.subtask).to eql("whoami")
     expect(command.application).to eql(nil)
     expect { command.run }.to_not raise_error
-    expect(command.response[:text]).to match("atmos@atmos.org")
+
+    expect(command.response[:attachments].size).to eql(1)
+    attachment = command.response[:attachments].first
+    expect(attachment[:text]).to match("atmos@atmos.org")
   end
 
   it "has a auth:logout command" do
