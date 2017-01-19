@@ -78,15 +78,6 @@ module HerokuCommands
       end
     end
 
-    def error_response_for_escobar_failed_commit_statuses(error)
-      {
-        response_type: "in_channel",
-        attachments: [
-          { text: error.message }
-        ]
-      }
-    end
-
     def response_for(text)
       { text: text, response_type: "in_channel" }
     end
