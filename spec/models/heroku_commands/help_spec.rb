@@ -1,22 +1,18 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Help, type: :model do
-  include SlashHeroku::Support::Helpers::Api
-
-  def heroku_handler_for(text)
-    command = command_for(text)
-    command.handler
-  end
-
   it "has a default help command" do
-    command = heroku_handler_for("help")
+    command = command_for("help")
     expect(command.task).to eql("help")
     expect(command.subtask).to eql("default")
     expect(command.application).to eql(nil)
-    expect { command.run }.to_not raise_error
 
-    expect(command.response[:attachments].size).to eql(1)
-    attachment = command.response[:attachments].first
+    heroku_command = HerokuCommands::Help.new(command)
+
+    expect { heroku_command.run }.to_not raise_error
+
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
     expect(attachment[:fallback])
       .to eql("Help commands from the heroku integration")
     expect(attachment[:pretext])

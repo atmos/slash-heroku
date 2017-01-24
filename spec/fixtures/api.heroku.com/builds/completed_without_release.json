@@ -1,0 +1,29 @@
+{
+  "app": {
+    "id": "01234567-89ab-cdef-0123-456789abcdef"
+  },
+  "buildpacks": [
+    {
+      "url": "https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz"
+    }
+  ],
+  "created_at": "2017-01-14T18:27:05Z",
+  "id": "b80207dc-139f-4546-aedc-985d9cfcafab",
+  "output_stream_url": "https://build-output.heroku.com/streams/27/27c36d69-0567-4964-8ccc-df906f08eba4/logs/b8/b80207dc-139f-4546-aedc-985d9cfcafab.log",
+  "slug": {
+    "id": "c782eba3-db0f-44cd-a8cb-a7a3d41ef831"
+  },
+  "release": { },
+  "source_blob": {
+    "checksum": null,
+    "url": "https://codeload.github.com/heroku/slash-heroku/legacy.tar.gz/f7c319ed2be5d9de5d6bc71665101d6f49836439?token=tokens",
+    "version": "f7c319ed2be5d9de5d6bc71665101d6f49836439",
+    "version_description": "heroku/slash-heroku:f7c319ed2be5d9de5d6bc71665101d6f49836439"
+  },
+  "status": "succeeded",
+  "updated_at": "2017-01-14T18:27:29Z",
+  "user": {
+    "email": "corey@heroku.com",
+    "id": "fa9b1317-69ee-4bfc-9f7d-0471011d0e00"
+  }
+}

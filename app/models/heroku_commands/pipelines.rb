@@ -8,7 +8,7 @@ module HerokuCommands
     def self.help_documentation
       [
         "pipelines - View available pipelines.",
-        "pipelines:info -a APP - View detailed information for a pipeline."
+        "pipelines:info -a PIPELINE - View detailed information for a pipeline."
       ]
     end
 

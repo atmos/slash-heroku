@@ -1,35 +1,27 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Deploy, type: :model do
-  include SlashHeroku::Support::Helpers::Api
-
-  before do
-  end
-
-  def heroku_handler_for(text)
-    command = command_for(text)
-    command.handler
-  end
-
   it "makes you sign up for GitHub OAuth" do
-    command = heroku_handler_for("deploy hubot")
+    command = command_for("deploy hubot")
     message = "You're not authenticated with GitHub yet. " \
                 "<https://www.example.com/auth/github([^|]+)|Fix that>."
 
     expect(command.task).to eql("deploy")
     expect(command.subtask).to eql("default")
-    expect(command.pipeline_name).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Deploy.new(command)
 
-    expect(command.response[:response_type]).to eql("in_channel")
-    expect(command.response[:text]).to match(Regexp.new(message))
-    expect(command.response[:attachments]).to be_nil
+    heroku_command.run
+
+    expect(heroku_command.pipeline_name).to eql("hubot")
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:text]).to match(Regexp.new(message))
+    expect(heroku_command.response[:attachments]).to be_nil
   end
 
   # rubocop:disable Metrics/LineLength
   it "has a deploy command" do
-    command = heroku_handler_for("deploy hubot to production")
+    command = command_for("deploy hubot to production")
     user = command.user
     user.github_token = Digest::SHA1.hexdigest(Time.now.utc.to_f.to_s)
     user.save
@@ -89,15 +81,17 @@ RSpec.describe HerokuCommands::Deploy, type: :model do
 
     expect(command.task).to eql("deploy")
     expect(command.subtask).to eql("default")
-    expect(command.pipeline_name).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Deploy.new(command)
 
-    expect(command.response).to be_empty
+    heroku_command.run
+
+    expect(heroku_command.pipeline_name).to eql("hubot")
+    expect(heroku_command.response).to be_empty
   end
 
   it "responds to you if required commit statuses aren't present" do
-    command = heroku_handler_for("deploy hubot to production")
+    command = command_for("deploy hubot to production")
     user = command.user
     user.github_token = Digest::SHA1.hexdigest(Time.now.utc.to_f.to_s)
     user.save
@@ -148,14 +142,16 @@ RSpec.describe HerokuCommands::Deploy, type: :model do
 
     expect(command.task).to eql("deploy")
     expect(command.subtask).to eql("default")
-    expect(command.pipeline_name).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Deploy.new(command)
 
-    expect(command.response[:response_type]).to eql("in_channel")
-    expect(command.response[:text]).to be_nil
-    expect(command.response[:attachments].size).to eql(1)
-    attachment = command.response[:attachments].first
+    heroku_command.run
+
+    expect(heroku_command.pipeline_name).to eql("hubot")
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:text]).to be_nil
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
     expect(attachment[:text]).to eql(
       "Unable to create GitHub deployments for atmos/hubot: " \
       "Conflict: Commit status checks failed for master."
@@ -163,7 +159,7 @@ RSpec.describe HerokuCommands::Deploy, type: :model do
   end
 
   it "prompts to unlock in the dashboard if the app is 2fa protected" do
-    command = heroku_handler_for("deploy hubot to production")
+    command = command_for("deploy hubot to production")
     user = command.user
     user.github_token = Digest::SHA1.hexdigest(Time.now.utc.to_f.to_s)
     user.save
@@ -195,15 +191,17 @@ RSpec.describe HerokuCommands::Deploy, type: :model do
 
     expect(command.task).to eql("deploy")
     expect(command.subtask).to eql("default")
-    expect(command.pipeline_name).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Deploy.new(command)
 
-    expect(command.response[:text]).to be_nil
-    expect(command.response[:response_type]).to be_nil
+    heroku_command.run
+
+    expect(heroku_command.pipeline_name).to eql("hubot")
+    expect(heroku_command.response[:text]).to be_nil
+    expect(heroku_command.response[:response_type]).to be_nil
     attachments = [
       { text: "<https://dashboard.heroku.com/apps/hubot|Unlock hubot>" }
     ]
-    expect(command.response[:attachments]).to eql(attachments)
+    expect(heroku_command.response[:attachments]).to eql(attachments)
   end
 end

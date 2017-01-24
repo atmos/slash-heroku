@@ -1,7 +1,7 @@
 require "rails_helper"
 
 RSpec.describe Deployment, type: :model do
-  include SlashHeroku::Support::Helpers::Api
+  include Helpers::Command::Pipelines
 
   before do
   end

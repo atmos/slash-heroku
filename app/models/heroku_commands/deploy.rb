@@ -26,45 +26,6 @@ module HerokuCommands
       @environment ||= info.environment || pipeline.default_environment
     end
 
-    def default_heroku_application
-      @default_heroku_application ||=
-        pipeline.default_heroku_application(environment)
-    end
-
-    def custom_payload
-      {
-        notify: {
-          room: command.channel_name,
-          user: command.user.slack_user_id,
-          team_id: command.team_id,
-          user_name: command.user.slack_user_name
-        }
-      }
-    end
-
-    def command_expired?
-      command.created_at < 60.seconds.ago
-    end
-
-    def handle_locked_application(error)
-      CommandExecutorJob
-        .set(wait: 0.5.seconds)
-        .perform_later(command_id: command.id) unless command_expired?
-
-      if command.processed_at.nil?
-        error_response_for_escobar(error)
-      else
-        {}
-      end
-    end
-
-    def reap_heroku_build(heroku_build)
-      DeploymentReaperJob
-        .set(wait: 10.seconds)
-        .perform_later(heroku_build.to_job_json)
-      {}
-    end
-
     def deploy_application
       if pipeline_name && !pipeline
         response_for("Unable to find a pipeline called #{pipeline_name}")

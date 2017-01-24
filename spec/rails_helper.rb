@@ -59,4 +59,5 @@ RSpec.configure do |config|
   config.include(SlackActionsHelpers)
   config.include(OmniauthHelpers)
   config.include(FixtureHelpers)
+  config.include(Helpers::Api)
 end

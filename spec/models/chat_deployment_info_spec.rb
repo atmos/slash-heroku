@@ -1,11 +1,6 @@
 require "rails_helper"
 
 RSpec.describe ChatDeploymentInfo, type: :model do
-  include SlashHeroku::Support::Helpers::Api
-
-  before do
-  end
-
   it "has a deploy:info command" do
     expect(ChatDeploymentInfo.from_text("ping")).to_not be_valid
     expect(ChatDeploymentInfo.from_text("image me pugs")).to_not be_valid

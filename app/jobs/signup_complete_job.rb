@@ -11,7 +11,8 @@ class SignupCompleteJob < ApplicationJob
       command.user_id = user_id
       command.save
     end
-    command.notify_user_of_success!
+
+    SignupComplete.notify(user_id, command.response_url)
     CommandExecutorJob.perform_later(command_id: command.id)
   end
 end

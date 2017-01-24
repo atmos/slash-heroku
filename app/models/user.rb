@@ -37,9 +37,9 @@ class User < ApplicationRecord
     @heroku_api ||= HerokuApi.new(heroku_token)
   end
 
-  def pipeline_for(application)
+  def pipeline_for(pipeline_name)
     return unless pipelines
-    pipelines[application]
+    pipelines[pipeline_name]
   end
 
   def onboarded?

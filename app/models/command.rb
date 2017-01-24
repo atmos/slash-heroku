@@ -17,26 +17,6 @@ class Command < ApplicationRecord
     )
   end
 
-  def run
-    handler.run
-    postback_message(handler.response)
-  end
-
-  def handler
-    @handler ||= case task
-                 when "auth"
-                   HerokuCommands::Auth.new(self)
-                 when "deploy"
-                   HerokuCommands::Deploy.new(self)
-                 when "pipeline", "pipelines"
-                   HerokuCommands::Pipelines.new(self)
-                 when "releases"
-                   HerokuCommands::Releases.new(self)
-                 else # when "help"
-                   HerokuCommands::Help.new(self)
-                 end
-  end
-
   def description
     if application
       "Running(#{id}): '#{task}:#{subtask}' for #{application}..."
@@ -45,19 +25,8 @@ class Command < ApplicationRecord
     end
   end
 
-  def notify_user_of_success!
-    user = User.find_by(slack_user_id: slack_user_id)
-    return unless user
-    name = "<@#{user.slack_user_id}|#{user.slack_user_name}>"
-    postback_message(text_response("#{name} you're all set. :tada:"))
-  end
-
   def default_response
     { response_type: "in_channel" }
-  end
-
-  def text_response(text)
-    { text: text, response_type: "in_channel" }
   end
 
   def auth_url_prefix
@@ -94,27 +63,7 @@ class Command < ApplicationRecord
     Base64.encode64(data).split("\n").join("")
   end
 
-  def postback_message(message)
-    response = client.post do |request|
-      request.url callback_uri.path
-      request.body = message.to_json
-      request.headers["Content-Type"] = "application/json"
-    end
-
-    Rails.logger.info action: "command#postback_message", body: response.body
-  rescue StandardError => e
-    Rails.logger.info "Unable to post back to slack: '#{e.inspect}'"
-  end
-
   private
-
-  def callback_uri
-    @callback_uri ||= Addressable::URI.parse(response_url)
-  end
-
-  def client
-    @client ||= Faraday.new(url: "https://hooks.slack.com")
-  end
 
   def extract_cli_args
     self.subtask = "default"

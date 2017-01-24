@@ -25,7 +25,7 @@ class DeploymentRequest
     heroku_application.preauth(second_factor) if second_factor
 
     heroku_build = create_heroku_build
-    reap_heroku_build(heroku_build)
+    poll_heroku_build(heroku_build)
   rescue Escobar::Heroku::BuildRequest::Error => e
     handle_escobar_exception(e)
   rescue StandardError => e
@@ -87,10 +87,14 @@ class DeploymentRequest
     end
   end
 
-  def reap_heroku_build(heroku_build)
-    DeploymentReaperJob
+  def poller_arguments(heroku_build)
+    heroku_build.to_job_json.merge(user_id: user.id)
+  end
+
+  def poll_heroku_build(heroku_build)
+    DeploymentPollerJob
       .set(wait: 10.seconds)
-      .perform_later(heroku_build.to_job_json)
+      .perform_later(poller_arguments(heroku_build))
     {}
   end
 end

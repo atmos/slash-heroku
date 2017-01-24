@@ -1,8 +1,6 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Releases, type: :model do
-  include SlashHeroku::Support::Helpers::Api
-
   before do
     Timecop.freeze(Time.zone.local(2016, 3, 13))
   end
@@ -11,14 +9,9 @@ RSpec.describe HerokuCommands::Releases, type: :model do
     Timecop.return
   end
 
-  def heroku_handler_for(text)
-    command = command_for(text)
-    command.handler
-  end
-
   # rubocop:disable Metrics/LineLength
   it "has a releases -a command" do
-    command = heroku_handler_for("releases -a atmos-dot-org")
+    command = command_for("releases -a atmos-dot-org")
 
     response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/list")
     stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases")
@@ -28,11 +21,14 @@ RSpec.describe HerokuCommands::Releases, type: :model do
     expect(command.task).to eql("releases")
     expect(command.subtask).to eql("default")
     expect(command.application).to eql("atmos-dot-org")
-    expect { command.run }.to_not raise_error
 
-    expect(command.response[:response_type]).to eql("in_channel")
-    expect(command.response[:attachments].size).to eql(1)
-    attachment = command.response[:attachments].first
+    heroku_command = HerokuCommands::Releases.new(command)
+
+    expect { heroku_command.run }.to_not raise_error
+
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
     expect(attachment[:fallback])
       .to eql("Latest releases for Heroku application atmos-dot-org")
     expect(attachment[:pretext]).to eql(nil)
@@ -70,7 +66,7 @@ RSpec.describe HerokuCommands::Releases, type: :model do
     # rubocop:enable Metrics/LineLength
 
     it "supports numbered releases" do
-      command = heroku_handler_for("releases:info 9 -a atmos-dot-org")
+      command = command_for("releases:info 9 -a atmos-dot-org")
 
       response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/info")
       stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases/9")
@@ -80,13 +76,16 @@ RSpec.describe HerokuCommands::Releases, type: :model do
       expect(command.task).to eql("releases")
       expect(command.subtask).to eql("info")
       expect(command.application).to eql("atmos-dot-org")
-      expect { command.run }.to_not raise_error
 
-      verify_release(command.response)
+      heroku_command = HerokuCommands::Releases.new(command)
+
+      expect { heroku_command.run }.to_not raise_error
+
+      verify_release(heroku_command.response)
     end
 
     it "supports numbered releases with v prefix" do
-      command = heroku_handler_for("releases:info v9 -a atmos-dot-org")
+      command = command_for("releases:info v9 -a atmos-dot-org")
 
       response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/info")
       stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases/9")
@@ -96,9 +95,12 @@ RSpec.describe HerokuCommands::Releases, type: :model do
       expect(command.task).to eql("releases")
       expect(command.subtask).to eql("info")
       expect(command.application).to eql("atmos-dot-org")
-      expect { command.run }.to_not raise_error
 
-      verify_release(command.response)
+      heroku_command = HerokuCommands::Releases.new(command)
+
+      expect { heroku_command.run }.to_not raise_error
+
+      verify_release(heroku_command.response)
     end
   end
 end

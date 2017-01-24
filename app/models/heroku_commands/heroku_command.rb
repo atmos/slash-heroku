@@ -82,7 +82,3 @@ module HerokuCommands
     end
   end
 end
-
-require_relative "./auth"
-require_relative "./help"
-require_relative "./releases"

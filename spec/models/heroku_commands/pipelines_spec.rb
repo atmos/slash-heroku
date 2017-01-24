@@ -1,7 +1,8 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Pipelines, type: :model do
-  include SlashHeroku::Support::Helpers::Api
+  include Helpers::Command::Pipelines
+
   def not_found_response
     {
       message: "Not Found",
@@ -9,35 +10,24 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     }.to_json
   end
 
-  def heroku_handler_for(text)
-    command = command_for(text)
-    command.handler
-  end
-
   it "lists available pipelines" do
-    command = heroku_handler_for("pipelines")
+    command = command_for("pipelines")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
 
-    response_info = fixture_data("api.heroku.com/account/info")
-    stub_request(:get, "https://api.heroku.com/account")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
-
-    response_info = fixture_data("api.heroku.com/pipelines/info")
-    stub_request(:get, "https://api.heroku.com/pipelines")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
+    stub_pipelines_command(command.user.heroku_token)
 
     expect(command.task).to eql("pipelines")
     expect(command.subtask).to eql("default")
     expect(command.application).to be_nil
 
-    command.run
+    heroku_command = HerokuCommands::Pipelines.new(command)
 
-    expect(command.response[:response_type]).to be_nil
-    expect(command.response[:attachments].size).to eql(1)
-    attachment = command.response[:attachments].first
+    heroku_command.run
+
+    expect(heroku_command.response[:response_type]).to be_nil
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
     expect(attachment[:text]).to eql(
       "You can deploy: hubot, slash-heroku."
     )
@@ -45,52 +35,23 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
   # rubocop:disable Metrics/LineLength
   it "has a pipeline:info command" do
-    command = heroku_handler_for("pipelines:info -a hubot")
+    command = command_for("pipelines:info -a hubot")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
 
-    response_info = fixture_data("api.heroku.com/account/info")
-    stub_request(:get, "https://api.heroku.com/account")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
-
-    response_info = fixture_data("api.heroku.com/pipelines/info")
-    stub_request(:get, "https://api.heroku.com/pipelines")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
-
-    response_info = fixture_data("api.heroku.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/pipeline-couplings")
-    stub_request(:get, "https://api.heroku.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/pipeline-couplings")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
-
-    response_info = fixture_data("api.heroku.com/apps/27bde4b5-b431-4117-9302-e533b887faaa")
-    stub_request(:get, "https://api.heroku.com/apps/27bde4b5-b431-4117-9302-e533b887faaa")
-      .with(headers: default_heroku_headers(command.user.heroku_token))
-      .to_return(status: 200, body: response_info, headers: {})
-
-    response_info = fixture_data("kolkrabbi.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/repository")
-    stub_request(:get, "https://kolkrabbi.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/repository")
-      .to_return(status: 200, body: response_info)
-
-    response = fixture_data("api.github.com/repos/atmos/hubot/index")
-    stub_request(:get, "https://api.github.com/repos/atmos/hubot")
-      .with(headers: default_github_headers(command.user.github_token))
-      .to_return(status: 200, body: response, headers: {})
-
-    response_info = fixture_data("api.github.com/repos/atmos/hubot/branches/production")
-    stub_request(:get, "https://api.github.com/repos/atmos/hubot/branches/production")
-      .to_return(status: 200, body: response_info, headers: {})
+    stub_pipeline_info_command(command.user.heroku_token, command.user.github_token)
 
     expect(command.task).to eql("pipelines")
     expect(command.subtask).to eql("info")
     expect(command.application).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Pipelines.new(command)
 
-    expect(command.response[:response_type]).to eql("in_channel")
-    expect(command.response[:attachments].size).to eql(1)
-    attachment = command.response[:attachments].first
+    heroku_command.run
+
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
     expect(attachment[:fallback])
       .to eql("Heroku app hubot (atmos/hubot)")
     expect(attachment[:pretext]).to eql(nil)
@@ -136,7 +97,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
   end
 
   it "tells you to login to GitHub if pipeline:info can't auth" do
-    command = heroku_handler_for("pipelines:info -a hubot")
+    command = command_for("pipelines:info -a hubot")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
 
@@ -175,9 +136,11 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     expect(command.subtask).to eql("info")
     expect(command.application).to eql("hubot")
 
-    command.run
+    heroku_command = HerokuCommands::Pipelines.new(command)
 
-    response = command.response
+    heroku_command.run
+
+    response = heroku_command.response
     expect(response[:response_type]).to eql("in_channel")
     expect(response[:text]).to include("You're not authenticated with GitHub.")
   end
