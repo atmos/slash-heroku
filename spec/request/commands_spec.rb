@@ -24,6 +24,19 @@ RSpec.describe "SlashHeroku /commands", type: :request do
     expect(response_body["text"]).to eql(link)
   end
 
+  it "returns an oops message if the endpoint 500s" do
+    create_atmos
+    allow(Command).to receive(:create).and_raise("Uninitialized Constant")
+
+    post "/commands", params: default_params(text: "ps")
+    expect(status).to eql(200)
+    response_body = JSON.parse(body)
+    expect(response_body["response_type"]).to eql("ephemeral")
+
+    message = "Oops, something went wrong."
+    expect(response_body["text"]).to eql(message)
+  end
+
   it "404s if the incoming command isn't from slack" do
     post "/commands", params: default_params(token: "rando-token", text: "ps")
 

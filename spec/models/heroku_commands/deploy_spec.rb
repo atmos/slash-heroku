@@ -1,10 +1,36 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Deploy, type: :model do
+  before do
+    Lock.clear_deploy_locks!
+  end
+
   it "makes you sign up for GitHub OAuth" do
     command = command_for("deploy hubot")
     message = "You're not authenticated with GitHub yet. " \
                 "<https://www.example.com/auth/github([^|]+)|Fix that>."
+
+    expect(command.task).to eql("deploy")
+    expect(command.subtask).to eql("default")
+
+    heroku_command = HerokuCommands::Deploy.new(command)
+
+    heroku_command.run
+
+    expect(heroku_command.pipeline_name).to eql("hubot")
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:text]).to match(Regexp.new(message))
+    expect(heroku_command.response[:attachments]).to be_nil
+  end
+
+  it "makes you sign up for Heroku OAuth" do
+    command = command_for("deploy hubot")
+    user = command.user
+    user.github_token = Digest::SHA1.hexdigest(Time.now.utc.to_f.to_s)
+    user.heroku_token = nil
+    user.save
+    message = "You're not authenticated with Heroku yet. " \
+                "<https://www.example.com/auth/slack([^|]+)|Fix that>."
 
     expect(command.task).to eql("deploy")
     expect(command.subtask).to eql("default")
@@ -201,6 +227,41 @@ RSpec.describe HerokuCommands::Deploy, type: :model do
     expect(heroku_command.response[:response_type]).to be_nil
     attachments = [
       { text: "<https://dashboard.heroku.com/apps/hubot|Unlock hubot>" }
+    ]
+    expect(heroku_command.response[:attachments]).to eql(attachments)
+  end
+
+  it "locks on second attempt" do
+    command = command_for("deploy hubot to production")
+    heroku_command = HerokuCommands::Deploy.new(command)
+    heroku_command.user.github_token = SecureRandom.hex(24)
+    heroku_command.user.save
+
+    response_info = fixture_data("api.heroku.com/pipelines/info")
+    stub_request(:get, "https://api.heroku.com/pipelines")
+      .with(headers: default_heroku_headers(heroku_command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/pipeline-couplings")
+    stub_request(:get, "https://api.heroku.com/pipelines/531a6f90-bd76-4f5c-811f-acc8a9f4c111/pipeline-couplings")
+      .with(headers: default_heroku_headers(heroku_command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/apps/27bde4b5-b431-4117-9302-e533b887faaa")
+    stub_request(:get, "https://api.heroku.com/apps/27bde4b5-b431-4117-9302-e533b887faaa")
+      .with(headers: default_heroku_headers(heroku_command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    # Fake the lock
+    Lock.new("escobar-app-27bde4b5-b431-4117-9302-e533b887faaa").lock
+
+    heroku_command.run
+
+    attachments = [
+      {
+        text: "Someone is already deploying to hubot",
+        color: "#f00"
+      }
     ]
     expect(heroku_command.response[:attachments]).to eql(attachments)
   end

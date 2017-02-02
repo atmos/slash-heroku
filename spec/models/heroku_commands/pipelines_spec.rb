@@ -35,7 +35,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
   # rubocop:disable Metrics/LineLength
   it "has a pipeline:info command" do
-    command = command_for("pipelines:info -a hubot")
+    command = command_for("pipelines:info hubot")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
 
@@ -43,7 +43,6 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
     expect(command.task).to eql("pipelines")
     expect(command.subtask).to eql("info")
-    expect(command.application).to eql("hubot")
 
     heroku_command = HerokuCommands::Pipelines.new(command)
 
@@ -97,7 +96,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
   end
 
   it "tells you to login to GitHub if pipeline:info can't auth" do
-    command = command_for("pipelines:info -a hubot")
+    command = command_for("pipelines:info hubot")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
 
@@ -134,7 +133,6 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
     expect(command.task).to eql("pipelines")
     expect(command.subtask).to eql("info")
-    expect(command.application).to eql("hubot")
 
     heroku_command = HerokuCommands::Pipelines.new(command)
 

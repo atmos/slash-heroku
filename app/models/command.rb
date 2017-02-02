@@ -68,9 +68,6 @@ class Command < ApplicationRecord
   def extract_cli_args
     self.subtask = "default"
 
-    match = command_text.match(/-a ([-_\.0-9a-z]+)/)
-    self.application = match[1] if match
-
     match = command_text.match(/^([-_\.0-9a-z]+)(?:\:([^\s]+))/)
     if match
       self.task    = match[1]

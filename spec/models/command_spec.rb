@@ -28,13 +28,4 @@ RSpec.describe Command, type: :model do
     expect(command.subtask).to eql("whoami")
     expect(command.application).to eql(nil)
   end
-
-  it "handles subtasks and apps properly" do
-    command_params = command_params_for("ps:restart -a my-hubot")
-    command = user.create_command_for(command_params)
-
-    expect(command.task).to eql("ps")
-    expect(command.subtask).to eql("restart")
-    expect(command.application).to eql("my-hubot")
-  end
 end

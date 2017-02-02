@@ -33,10 +33,6 @@ class User < ApplicationRecord
     end
   end
 
-  def heroku_api
-    @heroku_api ||= HerokuApi.new(heroku_token)
-  end
-
   def pipeline_for(pipeline_name)
     return unless pipelines
     pipelines[pipeline_name]
@@ -53,7 +49,7 @@ class User < ApplicationRecord
 
   def heroku_user_information
     return nil unless heroku_configured?
-    heroku_api.user_information
+    pipelines.heroku.user_information
   end
 
   def create_command_for(params)

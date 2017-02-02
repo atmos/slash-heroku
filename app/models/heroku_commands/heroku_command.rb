@@ -11,8 +11,10 @@ module HerokuCommands
     delegate :application, :subtask, :task, :user, to: :@command
 
     def initialize(command)
-      @command  = command
-      @client   = ::HerokuApi.new(user.heroku_token) if user
+      @command = command
+      if user
+        @client = Escobar::Client.new(user.github_token, user.heroku_token)
+      end
 
       @description = command.description.gsub("Running", "Ran")
       @response    = { text: description, response_type: "in_channel" }

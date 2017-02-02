@@ -22,18 +22,34 @@ class DeploymentRequest
   end
 
   def process
+    return app_is_locked unless locked?
     heroku_application.preauth(second_factor) if second_factor
 
     heroku_build = create_heroku_build
     poll_heroku_build(heroku_build)
   rescue Escobar::Heroku::BuildRequest::Error => e
+    unlock
     handle_escobar_exception(e)
   rescue StandardError => e
+    unlock
     Raven.capture_exception(e)
     command_handler.error_response_for(e.message)
   end
 
   private
+
+  def locked?
+    Lock.new(heroku_application.cache_key).lock
+  end
+
+  def unlock
+    Lock.new(heroku_application.cache_key).unlock
+  end
+
+  def app_is_locked
+    msg = "Someone is already deploying to #{heroku_application.name}"
+    command_handler.error_response_for(msg)
+  end
 
   def create_heroku_build
     heroku_build = heroku_build_request.create(

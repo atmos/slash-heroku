@@ -7,6 +7,6 @@ class ReleasePollerJob < ApplicationJob
   rescue StandardError => e
     Raven.capture_exception(e)
     Rails.logger.info e.inspect
-    Rails.logger.info "ArgList: #{args_list.inspect}"
+    Rails.logger.info "ArgList: #{args.inspect}"
   end
 end

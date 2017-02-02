@@ -1,3 +1,5 @@
+require "parse"
+
 module HerokuCommands
   # Class for handling release info
   class Releases < HerokuCommand
@@ -7,8 +9,8 @@ module HerokuCommands
 
     def self.help_documentation
       [
-        "releases -a APP - Display the last 10 releases for APP.",
-        "releases:info RELEASE -a APP - View detailed information for a release"
+        "releases PIPELINE - " \
+          "Display the last 25 releases for apps in the pipeline."
       ]
     end
 
@@ -16,81 +18,38 @@ module HerokuCommands
       @response = run_on_subtask
     end
 
-    def release_info
-      matches = command.command_text.match(/releases:\w+\s+(?:v)?([^\s]+)\s-a/)
-      version = matches && matches[1]
-      if version
-        response = client.release_info_for(application, version)
-        response_for_release(response)
-      else
-        response_for("release:info missing version, should be a number.")
-      end
+    def github_client
+      @github_client ||= Escobar::GitHub::Client.new(
+        client.github_token, github_repository
+      )
     end
 
     def releases_info
-      if application
-        response = client.releases_for(application)
-        response_for_releases(response)
+      if pipeline_name
+        app = Escobar::Heroku::App.new(client, application_for_releases)
+
+        releases = app.releases_json
+        deploys = github_client.deployments
+
+        response = ::Parse::Releases.new(releases, deploys, github_repository)
+        response_for_releases(response.markdown)
       else
         help_for_task
       end
     end
 
     def run_on_subtask
-      case subtask
-      when "info"
-        release_info
-      when "rollback"
-        response_for("release:rollback is currently unimplemented.")
-      else
-        releases_info
-      end
+      releases_info
     rescue StandardError
-      response_for("Unable to fetch recent releases for #{application}.")
+      response_for("Unable to fetch recent releases for #{pipeline_name}.")
     end
 
-    def response_markdown_for(releases)
-      releases.map do |release|
-        "v#{release[:version]} - #{release[:description]} - " \
-        "#{release[:user][:email]} - " \
-          "#{time_ago_in_words(release[:created_at])}"
-      end.join("\n")
+    def dashboard_markup
+      "<#{dashboard_link}|#{pipeline_name}>"
     end
 
-    def dashboard_markup(application)
-      "<#{dashboard_link(application)}|#{application}>"
-    end
-
-    def dashboard_link(application)
-      "https://dashboard.heroku.com/apps/#{application}"
-    end
-
-    def response_for_release(release)
-      version     = release[:version]
-      dashboard   = dashboard_markup(application)
-      description = release[:description]
-      {
-        response_type: "in_channel",
-        attachments: [
-          {
-            title: "#{dashboard} - v#{version} - #{description}",
-            fallback: "Heroku release for #{application}:v#{version}",
-            fields: [
-              {
-                title: "By",
-                value: release[:user][:email],
-                short: true
-              },
-              {
-                title: "When",
-                value: time_ago_in_words(release[:created_at]),
-                short: true
-              }
-            ],
-            color: COLOR
-          }
-        ]
-      }
+    def dashboard_link
+      "https://dashboard.heroku.com/pipelines/#{pipeline_name}"
     end
 
     def response_for_releases(releases)
@@ -100,12 +59,57 @@ module HerokuCommands
         attachments: [
           {
             color: COLOR,
-            text: response_markdown_for(releases),
-            title: "#{dashboard_markup(application)} - Recent releases",
-            fallback: "Latest releases for Heroku application #{application}"
+            text: releases,
+            title: "#{dashboard_markup} - Recent #{environment} releases",
+            fallback: "Latest releases for Heroku pipeline #{pipeline_name}"
           }
         ]
       }
+    end
+
+    delegate :default_environment, :github_repository, to: :pipeline
+
+    def environment
+      case releases_match[:environment]
+      when "stg", "staging"
+        "staging"
+      else
+        "production"
+      end
+    end
+
+    def application_for_releases
+      pipeline.environments[environment].first.app.id
+    end
+
+    def pipeline
+      user.pipeline_for(pipeline_name)
+    end
+
+    def available_pipelines
+      user.pipelines
+    end
+
+    def pipeline_name
+      releases_match[:pipeline_name]
+    end
+
+    def releases_match
+      command.command_text.match(releases_pattern) || {}
+    end
+
+    def releases_pattern
+      /
+        releases
+        \s+
+        (?<pipeline_name>[-_\.0-9a-z]+) # Pipeline name
+        (?:
+          \s+
+          in
+          \s+
+          (?<environment>[-_\.0-9a-z]+) # Optional environment
+        )?
+      /x
     end
   end
 end

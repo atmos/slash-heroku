@@ -1,6 +1,6 @@
 # Heroku build release phase poller
 class ReleasePoller
-  attr_reader :args, :app_name, :build_id,
+  attr_reader :args, :app_name, :app_id, :build_id,
     :release_id, :deployment_url,
     :user_id, :pipeline_name
 
@@ -13,11 +13,12 @@ class ReleasePoller
   def initialize(args = {})
     @args           = args
     @app_name       = args.fetch(:app_name)
+    @app_id         = args.fetch(:app_id)
     @build_id       = args.fetch(:build_id)
     @release_id     = args.fetch(:release_id)
     @deployment_url = args.fetch(:deployment_url)
     @user_id        = args.fetch(:user_id)
-    @pipeline_name  = args.fetch(:name)
+    @pipeline_name  = args.fetch(:pipeline_name)
   end
 
   def run
@@ -26,15 +27,20 @@ class ReleasePoller
       ReleasePollerJob.set(wait: 10.seconds).perform_later(args)
     else
       release_completed
+      unlock
     end
   end
 
   def release
-    @release ||= Escobar::Heroku::Release.new(escobar_client, app_name,
+    @release ||= Escobar::Heroku::Release.new(escobar_client, app_id,
                                               build_id, release_id)
   end
 
   private
+
+  def unlock
+    Lock.new(release.app.cache_key).unlock
+  end
 
   def release_completed
     payload = {

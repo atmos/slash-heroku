@@ -60,4 +60,8 @@ RSpec.configure do |config|
   config.include(OmniauthHelpers)
   config.include(FixtureHelpers)
   config.include(Helpers::Api)
+
+  def redis
+    @redis ||= Redis.new
+  end
 end

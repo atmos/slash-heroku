@@ -1,6 +1,6 @@
 # Heroku deployment build poller
 class DeploymentPoller
-  attr_reader :args, :sha, :repo, :app_name,
+  attr_reader :args, :sha, :repo, :app_name, :app_id,
     :build_id, :deployment_url,
     :user_id, :pipeline_name
 
@@ -15,10 +15,11 @@ class DeploymentPoller
     @sha            = args.fetch(:sha)
     @repo           = args.fetch(:repo)
     @app_name       = args.fetch(:app_name)
+    @app_id         = args.fetch(:app_id)
     @build_id       = args.fetch(:build_id)
     @deployment_url = args.fetch(:deployment_url)
     # Escobar Build has the pipeline name as name in job_json
-    @pipeline_name  = args.fetch(:name)
+    @pipeline_name  = args.fetch(:pipeline_name)
     @user_id        = args.fetch(:user_id)
   end
 
@@ -30,14 +31,19 @@ class DeploymentPoller
       poll_release
     else
       build_completed
+      unlock
     end
   end
 
   def build
-    @build ||= Escobar::Heroku::Build.new(escobar_client, app_name, build_id)
+    @build ||= Escobar::Heroku::Build.new(escobar_client, app_id, build_id)
   end
 
   private
+
+  def unlock
+    Lock.new(build.app.cache_key).unlock
+  end
 
   def poll_release
     Rails.logger.info "Build Complete: #{artifact.to_json}. Releasing..."

@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe HerokuCommands::Releases, type: :model do
+  include Helpers::Command::Pipelines
+
   before do
     Timecop.freeze(Time.zone.local(2016, 3, 13))
   end
@@ -10,97 +12,106 @@ RSpec.describe HerokuCommands::Releases, type: :model do
   end
 
   # rubocop:disable Metrics/LineLength
-  it "has a releases -a command" do
-    command = command_for("releases -a atmos-dot-org")
+  it "has a releases command with default environment" do
+    command = command_for("releases slash-heroku in staging")
+    command.user.github_token = SecureRandom.hex(24)
+    command.user.save
 
-    response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/list")
-    stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases")
+    stub_pipelines_command(command.user.heroku_token)
+
+    response_info = fixture_data("api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee/releases")
+    stub_request(:get, "https://api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee/releases")
       .with(headers: default_heroku_headers(command.user.heroku_token))
       .to_return(status: 200, body: response_info, headers: {})
 
+    response_info = fixture_data("api.heroku.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/pipeline-couplings")
+    stub_request(:get, "https://api.heroku.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/pipeline-couplings")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee")
+    stub_request(:get, "https://api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
+    stub_request(:get, "https://kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
+      .to_return(status: 200, body: response_info)
+
+    response_info = fixture_data("api.github.com/repos/atmos/slash-heroku/deployments")
+    stub_request(:get, "https://api.github.com/repos/atmos/slash-heroku/deployments")
+      .to_return(status: 200, body: response_info)
+
     expect(command.task).to eql("releases")
     expect(command.subtask).to eql("default")
-    expect(command.application).to eql("atmos-dot-org")
 
     heroku_command = HerokuCommands::Releases.new(command)
 
-    expect { heroku_command.run }.to_not raise_error
+    heroku_command.run
 
+    expect(heroku_command.environment).to eql("staging")
     expect(heroku_command.response[:response_type]).to eql("in_channel")
     expect(heroku_command.response[:attachments].size).to eql(1)
     attachment = heroku_command.response[:attachments].first
     expect(attachment[:fallback])
-      .to eql("Latest releases for Heroku application atmos-dot-org")
+      .to eql("Latest releases for Heroku pipeline slash-heroku")
     expect(attachment[:pretext]).to eql(nil)
-    expect(attachment[:text].split("\n").size).to eql(9)
+    expect(attachment[:text].split("\n").size).to eql(10)
     expect(attachment[:title])
-      .to eql("<https://dashboard.heroku.com/apps/atmos-dot-org|atmos-dot-org> - Recent releases")
+      .to eql("<https://dashboard.heroku.com/pipelines/slash-heroku|slash-heroku> - Recent staging releases")
+    expect(attachment[:title_link]).to eql(nil)
+    expect(attachment[:fields]).to eql(nil)
+  end
+
+  it "has a releases command with specific environment" do
+    command = command_for("releases slash-heroku")
+    command.user.github_token = SecureRandom.hex(24)
+    command.user.save
+
+    stub_pipelines_command(command.user.heroku_token)
+
+    response_info = fixture_data("api.heroku.com/apps/b0deddbf-cf56-48e4-8c3a-3ea143be2333/releases")
+    stub_request(:get, "https://api.heroku.com/apps/b0deddbf-cf56-48e4-8c3a-3ea143be2333/releases")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/pipeline-couplings")
+    stub_request(:get, "https://api.heroku.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/pipeline-couplings")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee")
+    stub_request(:get, "https://api.heroku.com/apps/760bc95e-8780-4c76-a688-3a4af92a3eee")
+      .with(headers: default_heroku_headers(command.user.heroku_token))
+      .to_return(status: 200, body: response_info, headers: {})
+
+    response_info = fixture_data("kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
+    stub_request(:get, "https://kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
+      .to_return(status: 200, body: response_info)
+
+    response_info = fixture_data("api.github.com/repos/atmos/slash-heroku/deployments")
+    stub_request(:get, "https://api.github.com/repos/atmos/slash-heroku/deployments")
+      .to_return(status: 200, body: response_info)
+
+    expect(command.task).to eql("releases")
+    expect(command.subtask).to eql("default")
+
+    heroku_command = HerokuCommands::Releases.new(command)
+
+    heroku_command.run
+
+    expect(heroku_command.environment).to eql("production")
+    expect(heroku_command.response[:response_type]).to eql("in_channel")
+    expect(heroku_command.response[:attachments].size).to eql(1)
+    attachment = heroku_command.response[:attachments].first
+    expect(attachment[:fallback])
+      .to eql("Latest releases for Heroku pipeline slash-heroku")
+    expect(attachment[:pretext]).to eql(nil)
+    expect(attachment[:text].split("\n").size).to eql(10)
+    expect(attachment[:title])
+      .to eql("<https://dashboard.heroku.com/pipelines/slash-heroku|slash-heroku> - Recent production releases")
     expect(attachment[:title_link]).to eql(nil)
     expect(attachment[:fields]).to eql(nil)
   end
   # rubocop:enable Metrics/LineLength
-
-  describe "release:info" do
-    # rubocop:disable Metrics/AbcSize
-    # rubocop:disable Metrics/LineLength
-    def verify_release(response)
-      expect(response[:text]).to eql(nil)
-      expect(response[:attachments].size).to eql(1)
-
-      attachment = response[:attachments].first
-      expect(attachment[:fallback])
-        .to eql("Heroku release for atmos-dot-org:v9")
-      expect(attachment[:text]).to eql(nil)
-      expect(attachment[:title])
-        .to eql("<https://dashboard.heroku.com/apps/atmos-dot-org|atmos-dot-org> - v9 - Deploy 774377e")
-      expect(attachment[:title_link]).to eql(nil)
-      expect(attachment[:fields].size).to eql(2)
-
-      fields = attachment[:fields]
-      expect(fields.first[:title]).to eql("By")
-      expect(fields.first[:value]).to eql("atmos@atmos.org")
-      expect(fields.last[:title]).to eql("When")
-      expect(fields.last[:value]).to eql("3 months")
-    end
-    # rubocop:enable Metrics/AbcSize
-    # rubocop:enable Metrics/LineLength
-
-    it "supports numbered releases" do
-      command = command_for("releases:info 9 -a atmos-dot-org")
-
-      response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/info")
-      stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases/9")
-        .with(headers: default_heroku_headers(command.user.heroku_token))
-        .to_return(status: 200, body: response_info, headers: {})
-
-      expect(command.task).to eql("releases")
-      expect(command.subtask).to eql("info")
-      expect(command.application).to eql("atmos-dot-org")
-
-      heroku_command = HerokuCommands::Releases.new(command)
-
-      expect { heroku_command.run }.to_not raise_error
-
-      verify_release(heroku_command.response)
-    end
-
-    it "supports numbered releases with v prefix" do
-      command = command_for("releases:info v9 -a atmos-dot-org")
-
-      response_info = fixture_data("api.heroku.com/releases/atmos-dot-org/info")
-      stub_request(:get, "https://api.heroku.com/apps/atmos-dot-org/releases/9")
-        .with(headers: default_heroku_headers(command.user.heroku_token))
-        .to_return(status: 200, body: response_info, headers: {})
-
-      expect(command.task).to eql("releases")
-      expect(command.subtask).to eql("info")
-      expect(command.application).to eql("atmos-dot-org")
-
-      heroku_command = HerokuCommands::Releases.new(command)
-
-      expect { heroku_command.run }.to_not raise_error
-
-      verify_release(heroku_command.response)
-    end
-  end
 end

@@ -8,7 +8,7 @@ module HerokuCommands
     def self.help_documentation
       [
         "pipelines - View available pipelines.",
-        "pipelines:info -a PIPELINE - View detailed information for a pipeline."
+        "pipelines:info PIPELINE - View detailed information for a pipeline."
       ]
     end
 
@@ -74,7 +74,19 @@ module HerokuCommands
     end
 
     def pipeline_name
-      application
+      pipelines_match[:pipeline_name]
+    end
+
+    def pipelines_match
+      command.command_text.match(pipelines_pattern)
+    end
+
+    def pipelines_pattern
+      /
+        pipelines(?::[^\s]+)
+        \s
+        (?<pipeline_name>[-_\.0-9a-zA-Z]+) # Pipeline name
+      /x
     end
   end
 end
