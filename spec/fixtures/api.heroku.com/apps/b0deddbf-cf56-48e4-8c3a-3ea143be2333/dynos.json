@@ -1,0 +1,40 @@
+[
+  {
+    "attach_url":null,
+    "command":"bundle exec puma -C config/puma.rb",
+    "created_at":"2017-02-06T08:03:17Z",
+    "id":"b5e05c87-1e82-44b4-b9d8-14ba952f146c",
+    "name":"web.1",
+    "app":{
+      "id":"7bd2a1ac-1ed2-4fc5-b374-6c2ca276c340",
+      "name":"slash-h-production"
+    },
+    "release":{
+      "id":"715b6e1d-542b-40e1-9c7b-3d3128e78873",
+      "version":80
+    },
+    "size":"Standard-1X",
+    "state":"up",
+    "type":"web",
+    "updated_at":"2017-02-06T08:03:17Z"
+  },
+  {
+    "attach_url":null,
+    "command":"/usr/bin/env LIBRATO_AUTORUN=1 bundle exec sidekiq",
+    "created_at":"2017-02-06T04:36:53Z",
+    "id":"0eee5c26-9034-4869-9f9e-5877b3cbb7fb",
+    "name":"worker.1",
+    "app":{
+      "id":"7bd2a1ac-1ed2-4fc5-b374-6c2ca276c340",
+      "name":"slash-h-production"
+    },
+    "release":{
+      "id":"715b6e1d-542b-40e1-9c7b-3d3128e78873",
+      "version":80
+    },
+    "size":"Standard-1X",
+    "state":"up",
+    "type":"worker",
+    "updated_at":"2017-02-06T04:36:53Z"
+  }
+]

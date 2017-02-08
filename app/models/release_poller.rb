@@ -1,4 +1,4 @@
-# Heroku build release phase poller
+# Heroku release phase poller
 class ReleasePoller
   attr_reader :args, :app_name, :app_id, :build_id,
     :release_id, :deployment_url,
@@ -27,7 +27,7 @@ class ReleasePoller
       ReleasePollerJob.set(wait: 10.seconds).perform_later(args)
     else
       release_completed
-      unlock
+      DynoPollerJob.perform_later(args)
     end
   end
 
@@ -48,9 +48,10 @@ class ReleasePoller
       target_url:  build_url(app_name, build_id),
       description: "Release phase completed."
     }
-    payload[:state] = "success" if release.status == "succeeded"
+    payload[:state] = "pending" if release.status == "succeeded"
 
     pipeline.create_deployment_status(deployment_url, payload)
+    unlock
   end
 
   def user

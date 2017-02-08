@@ -16,7 +16,7 @@ module HerokuCommands
     end
 
     def run
-      @response = help_for_task
+      help_for_task
     end
   end
 end

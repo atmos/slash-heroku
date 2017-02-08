@@ -15,13 +15,17 @@ module HerokuCommands
     end
 
     def run
-      @response = run_on_subtask
+      run_on_subtask
     end
 
     def github_client
       @github_client ||= Escobar::GitHub::Client.new(
         client.github_token, github_repository
       )
+    end
+
+    def client
+      @client ||= Escobar::Client.new(user.github_token, user.heroku_token)
     end
 
     def releases_info
@@ -39,8 +43,14 @@ module HerokuCommands
     end
 
     def run_on_subtask
-      releases_info
+      if pipeline_name && !pipeline
+        response_for("Unable to find a pipeline called #{pipeline_name}")
+      else
+        releases_info
+      end
     rescue StandardError
+      raise e if Rails.env.test?
+      Raven.capture_exception(e)
       response_for("Unable to fetch recent releases for #{pipeline_name}.")
     end
 

@@ -29,6 +29,8 @@ class User < ApplicationRecord
   def self.slack_client
     Faraday.new(url: "https://slack.com") do |connection|
       connection.headers["Content-Type"] = "application/json"
+      connection.use :instrumentation
+      connection.use ZipkinTracer::FaradayHandler, "slack.com"
       connection.adapter Faraday.default_adapter
     end
   end

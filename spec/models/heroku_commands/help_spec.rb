@@ -11,8 +11,9 @@ RSpec.describe HerokuCommands::Help, type: :model do
 
     expect { heroku_command.run }.to_not raise_error
 
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    response = heroku_command.run
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:fallback])
       .to eql("Help commands from the heroku integration")
     expect(attachment[:pretext])

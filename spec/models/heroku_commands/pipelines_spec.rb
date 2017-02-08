@@ -23,11 +23,11 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
     heroku_command = HerokuCommands::Pipelines.new(command)
 
-    heroku_command.run
+    response = heroku_command.run
 
-    expect(heroku_command.response[:response_type]).to be_nil
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    expect(response[:response_type]).to be_nil
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:text]).to eql(
       "You can deploy: hubot, slash-heroku."
     )
@@ -46,11 +46,11 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
     heroku_command = HerokuCommands::Pipelines.new(command)
 
-    heroku_command.run
+    response = heroku_command.run
 
-    expect(heroku_command.response[:response_type]).to eql("in_channel")
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    expect(response[:response_type]).to eql("in_channel")
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:fallback])
       .to eql("Heroku app hubot (atmos/hubot)")
     expect(attachment[:pretext]).to eql(nil)
@@ -136,9 +136,8 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
 
     heroku_command = HerokuCommands::Pipelines.new(command)
 
-    heroku_command.run
+    response = heroku_command.run
 
-    response = heroku_command.response
     expect(response[:response_type]).to eql("in_channel")
     expect(response[:text]).to include("You're not authenticated with GitHub.")
   end

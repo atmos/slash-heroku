@@ -15,5 +15,6 @@ RSpec.configure do |config|
   config.before(:each) do
     WebMock.reset!
     WebMock.disable_net_connect!
+    stub_request(:post, "https://zipkin-staging.heroku.tools/api/v1/spans")
   end
 end

@@ -30,6 +30,10 @@ class YubikeyExpireJob < ApplicationJob
   end
 
   def client
-    @client ||= Faraday.new(url: "https://#{ENV['YUBIEXPIRE_HOSTNAME']}")
+    @client ||= Faraday.new(url: "https://#{ENV['YUBIEXPIRE_HOSTNAME']}") do |c|
+      c.use :instrumentation
+      c.use ZipkinTracer::FaradayHandler, "api.yubico.com"
+      c.adapter Faraday.default_adapter
+    end
   end
 end

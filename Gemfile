@@ -13,7 +13,7 @@ gem "bundler", ">= 1.3.0", "< 2.0"
 gem "coal_car", "~> 0.2"
 gem "coffee-rails", "~> 4.1.0"
 gem "compass-rails"
-gem "escobar", "0.3.8"
+gem "escobar", "0.3.10"
 gem "jbuilder", "~> 2.0"
 gem "jquery-rails"
 gem "librato-rails"
@@ -24,13 +24,12 @@ gem "omniauth-slack", "2.3.0"
 gem "pg"
 gem "puma"
 gem "railties", ">= 5.0.0.1", "< 5.1"
-gem "rails_stdout_logging", "0.0.4"
 gem "rbnacl-libsodium", require: "rbnacl/libsodium"
 gem "redis", "~> 3.0"
+gem "sass-rails", "~> 5.0"
 gem "sentry-raven"
 gem "sidekiq"
 gem "sinatra", "2.0.0.pre.alpha"
-gem "sass-rails", "~> 5.0"
 gem "sprockets-rails"
 gem "turbolinks"
 gem "uglifier", ">= 1.3.0"
@@ -54,8 +53,4 @@ end
 group :development do
   gem "foreman"
   gem "spring"
-end
-
-group :staging, :production do
-  gem "rails_12factor"
 end

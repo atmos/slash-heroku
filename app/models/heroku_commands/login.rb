@@ -17,11 +17,11 @@ module HerokuCommands
     end
 
     def run
-      @response = if user.onboarded?
-                    authenticated_user_response
-                  else
-                    user_onboarding_response
-                  end
+      if user.onboarded?
+        authenticated_user_response
+      else
+        user_onboarding_response
+      end
     end
 
     def authenticated_user_response

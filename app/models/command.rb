@@ -17,14 +17,6 @@ class Command < ApplicationRecord
     )
   end
 
-  def description
-    if application
-      "Running(#{id}): '#{task}:#{subtask}' for #{application}..."
-    else
-      "Running(#{id}): '#{task}:#{subtask}'..."
-    end
-  end
-
   def default_response
     { response_type: "in_channel" }
   end

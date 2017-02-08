@@ -19,7 +19,7 @@ module HerokuCommands
     end
 
     def run
-      @response = run_on_subtask
+      run_on_subtask
     end
 
     def environment
@@ -27,8 +27,6 @@ module HerokuCommands
     end
 
     def deploy_application
-      return authenticate_github_response unless user.github_configured?
-      return authenticate_heroku_response unless user.heroku_configured?
       if pipeline_name && !pipeline
         response_for("Unable to find a pipeline called #{pipeline_name}")
       else
@@ -51,16 +49,6 @@ module HerokuCommands
       raise e if Rails.env.test?
       Raven.capture_exception(e)
       response_for("Unable to fetch deployment info for #{pipeline_name}.")
-    end
-
-    def authenticate_heroku_response
-      response_for("You're not authenticated with Heroku yet. " \
-                   "Please <#{command.slack_auth_url}|Fix that>.")
-    end
-
-    def authenticate_github_response
-      response_for("You're not authenticated with GitHub yet. " \
-                   "<#{command.github_auth_url}|Fix that>.")
     end
 
     def repository_markup(deploy)

@@ -45,6 +45,13 @@ class DeploymentPoller
     Lock.new(build.app.cache_key).unlock
   end
 
+  def release_args
+    args.merge(
+      release_id: build.release_id,
+      epoch: Time.now.utc.to_s
+    )
+  end
+
   def poll_release
     Rails.logger.info "Build Complete: #{artifact.to_json}. Releasing..."
     payload = {
@@ -53,9 +60,7 @@ class DeploymentPoller
       description: "Build phase completed. Running release phase."
     }
     pipeline.create_deployment_status(deployment_url, payload)
-    ReleasePollerJob.perform_later(
-      args.merge(release_id: build.release_id)
-    )
+    ReleasePollerJob.perform_later(release_args)
   end
 
   def build_completed

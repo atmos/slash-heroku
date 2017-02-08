@@ -27,7 +27,11 @@ module GitHubTokenManagement
   # rubocop:disable Metrics/LineLength
   def github_oauth_consumer_client
     @github_oauth_consumer_client ||= begin
-                                        client = Faraday.new(url: "https://api.github.com")
+                                        client = Faraday.new(url: "https://api.github.com") do |c|
+                                          c.use :instrumentation
+                                          c.use ZipkinTracer::FaradayHandler, "api.github.com"
+                                          c.adapter Faraday.default_adapter
+                                        end
                                         client.basic_auth github_oauth_client_id, github_oauth_client_secret
                                         client
                                       end

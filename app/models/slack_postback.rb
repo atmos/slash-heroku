@@ -28,6 +28,10 @@ class SlackPostback
   end
 
   def client
-    @client ||= Faraday.new(url: "https://hooks.slack.com")
+    @client ||= Faraday.new(url: "https://hooks.slack.com") do |c|
+      c.use :instrumentation
+      c.use ZipkinTracer::FaradayHandler, "hooks.slack.com"
+      c.adapter Faraday.default_adapter
+    end
   end
 end

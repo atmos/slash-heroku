@@ -86,6 +86,12 @@ IfUnlessModifier:
 Metrics/AbcSize:
   Max: 16
 
+Metrics/BlockLength:
+  Max: 25
+  Severity: error
+  Exclude:
+    - 'spec/**/*'
+
 FrozenStringLiteralComment:
   Enabled: false # This is something that can wait. http://www.rubydoc.info/gems/rubocop/RuboCop/Cop/Style/FrozenStringLiteralComment
 

@@ -22,7 +22,11 @@ class HerokuApi
   end
 
   def token_refresh(refresh_token)
-    client = Faraday.new(url: "https://id.heroku.com")
+    client = Faraday.new(url: "https://id.heroku.com") do |c|
+      c.use :instrumentation
+      c.use ZipkinTracer::FaradayHandler, "id.heroku.com"
+      c.adapter Faraday.default_adapter
+    end
     params = {
       grant_type: "refresh_token",
       refresh_token: refresh_token,
@@ -104,10 +108,18 @@ class HerokuApi
   end
 
   def client
-    @client ||= Faraday.new(url: "https://api.heroku.com")
+    @client ||= Faraday.new(url: "https://api.heroku.com") do |c|
+      c.use :instrumentation
+      c.use ZipkinTracer::FaradayHandler, "api.heroku.com"
+      c.adapter Faraday.default_adapter
+    end
   end
 
   def logs_client
-    @login_client ||= Faraday.new(url: "https://logs-api.heroku.com")
+    @login_client ||= Faraday.new(url: "https://logs-api.heroku.com") do |c|
+      c.use :instrumentation
+      c.use ZipkinTracer::FaradayHandler, "logs-api.heroku.com"
+      c.adapter Faraday.default_adapter
+    end
   end
 end

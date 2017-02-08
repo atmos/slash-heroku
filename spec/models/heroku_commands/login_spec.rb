@@ -19,8 +19,9 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect(heroku_command.application).to eql(nil)
     expect { heroku_command.run }.to_not raise_error
 
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    response = heroku_command.run
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:text]).to match("atmos@atmos.org")
   end
 
@@ -34,8 +35,9 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect(command.application).to eql(nil)
     expect { heroku_command.run }.to_not raise_error
 
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    response = heroku_command.run
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:text]).to match("sign in to Heroku")
   end
 
@@ -49,8 +51,9 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect(command.application).to eql(nil)
     expect { heroku_command.run }.to_not raise_error
 
-    expect(heroku_command.response[:attachments].size).to eql(1)
-    attachment = heroku_command.response[:attachments].first
+    response = heroku_command.run
+    expect(response[:attachments].size).to eql(1)
+    attachment = response[:attachments].first
     expect(attachment[:text]).to match("not authenticated with GitHub yet")
   end
 end
