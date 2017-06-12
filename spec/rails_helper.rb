@@ -6,6 +6,7 @@ Dotenv.overload(".env.test")
 require "spec_helper"
 require File.expand_path("../../config/environment", __FILE__)
 require "rspec/rails"
+require "coal_car/spec_helpers"
 # Add additional requires below this line. Rails is not loaded until this point!
 
 OmniAuth.config.test_mode = true
@@ -60,6 +61,11 @@ RSpec.configure do |config|
   config.include(OmniauthHelpers)
   config.include(FixtureHelpers)
   config.include(Helpers::Api)
+  config.include(CoalCar::SpecHelpers)
+
+  config.before(:each) do
+    stub_zipkin!
+  end
 
   def redis
     @redis ||= Redis.new

@@ -48,7 +48,7 @@ module HerokuCommands
       else
         releases_info
       end
-    rescue StandardError
+    rescue StandardError => e
       raise e if Rails.env.test?
       Raven.capture_exception(e)
       response_for("Unable to fetch recent releases for #{pipeline_name}.")

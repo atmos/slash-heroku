@@ -1,0 +1,18 @@
+{
+  "created_at": "2016-03-14T12:24:37+00:00",
+  "creator": {
+    "id": "49221696-76e4-43ab-8f21-a3e9dcbca777"
+  },
+  "id": "56bbbf65-3537-4993-9d17-290d3e9b3222",
+  "pipeline": {
+    "id": "6c18c922-6eee-451c-b7c6-c76278652ccc"
+  },
+  "repository": {
+    "created_at": "2016-03-01T07:26:11+00:00",
+    "id": 26650088,
+    "name": "heroku/beeper",
+    "type": "github",
+    "updated_at": "2016-03-14T12:24:37+00:00"
+  },
+  "updated_at": null
+}

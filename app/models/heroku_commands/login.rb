@@ -17,48 +17,92 @@ module HerokuCommands
     end
 
     def run
-      if user.onboarded?
-        authenticated_user_response
-      else
-        user_onboarding_response
-      end
+      user_response
     end
 
-    def authenticated_user_response
-      {
-        attachments: [
-          { text: "You're authenticated as #{email} on Heroku." }
-        ]
-      }
-    end
+    private
 
-    def authenticate_github_response
+    def user_response
       {
+        response_type: "ephemeral",
+        text: response_main_text,
         attachments: [
           {
-            text: "You're not authenticated with GitHub yet. " \
-            "<#{command.github_auth_url}|Fix that>."
+            color: response_color,
+            mrkdwn_in: %w{text pretext fields},
+            attachment_type: "default",
+            fields: [heroku_response, github_response]
           }
         ]
       }
     end
 
-    def authenticate_heroku_response
+    def response_main_text
+      if onboarded?
+        "You're all set"
+      elsif onboarding?
+        "Connect your GitHub account"
+      else
+        "Connect your Heroku account"
+      end
+    end
+
+    def response_color
+      if onboarded?
+        "#36a64f"
+      elsif onboarding?
+        "#ffa807"
+      else
+        "#f00a1f"
+      end
+    end
+
+    def heroku_response
+      text = if heroku_configured?
+               "You're #{user.heroku_email}."
+             else
+               "Please <#{command.heroku_auth_url}|sign in to Heroku>."
+             end
+
       {
-        attachments: [
-          {
-            text: "Please <#{command.slack_auth_url}|sign in to Heroku>."
-          }
-        ]
+        title: "Heroku",
+        value: text,
+        short: true
       }
     end
 
-    def user_onboarding_response
-      if user.heroku_configured?
-        authenticate_github_response
-      else
-        authenticate_heroku_response
-      end
+    def github_response
+      text = if github_configured?
+               "You're #{github_link_for_slack}."
+             else
+               "Please <#{command.github_auth_url}|sign in to GitHub>."
+             end
+
+      {
+        title: "GitHub",
+        value: text,
+        short: true
+      }
+    end
+
+    def github_link_for_slack
+      "<https://github.com/#{user.github_login}|#{user.github_login}>"
+    end
+
+    def onboarded?
+      user && user.onboarded?
+    end
+
+    def onboarding?
+      user && user.onboarding?
+    end
+
+    def heroku_configured?
+      user && user.heroku_configured?
+    end
+
+    def github_configured?
+      user && user.github_configured?
     end
   end
 end

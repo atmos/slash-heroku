@@ -22,18 +22,17 @@ class DeploymentRequest
   end
 
   def process
+    return pipeline_needs_application_name if pipeline_needs_application_name?
     return app_is_locked unless lock_acquired?
-    heroku_application.preauth(second_factor) if second_factor
 
-    heroku_build = create_heroku_build
-    poll_heroku_build(heroku_build)
+    heroku_application.preauth(second_factor) if second_factor
+    poll_heroku_build(create_heroku_build)
   rescue Escobar::Heroku::BuildRequest::Error => e
     unlock
     handle_escobar_exception(e)
   rescue StandardError => e
     unlock
-    Raven.capture_exception(e)
-    command_handler.error_response_for(e.message)
+    handle_exception(e)
   end
 
   private
@@ -49,6 +48,15 @@ class DeploymentRequest
   def app_is_locked
     msg = "Someone is already deploying to #{heroku_application.name}"
     command_handler.error_response_for(msg)
+  end
+
+  def no_pipeline_application_provided_message
+    "There is more than one app in the #{pipeline.name} #{environment} stage:" \
+      " #{comma_delimited_app_names}. This is not supported yet."
+  end
+
+  def pipeline_needs_application_name
+    command_handler.error_response_for(no_pipeline_application_provided_message)
   end
 
   def create_heroku_build
@@ -79,12 +87,44 @@ class DeploymentRequest
       pipeline.default_heroku_application(environment)
   end
 
+  def chat_application_name
+    @chat_application_name ||= command_handler.info.application
+  end
+
+  def requested_heroku_application
+    return if chat_application_name.blank?
+    pipeline.environments[environment].find do |app|
+      return app.app if chat_application_name == app.app.name
+    end
+  end
+
   def pipeline
     @pipeline ||= command_handler.pipeline
   end
 
+  def apps
+    @apps ||= pipeline.environments[environment]
+  end
+
+  def pipeline_needs_application_name?
+    pipeline_has_multiple_apps? && requested_heroku_application.nil?
+  end
+
+  def pipeline_has_multiple_apps?
+    apps.count > 1
+  end
+
+  def comma_delimited_app_names
+    app_names.join(", ")
+  end
+
+  def app_names
+    apps.map(&:name)
+  end
+
   def heroku_application
-    @heroku_application ||= default_heroku_application
+    @heroku_application ||=
+      requested_heroku_application || default_heroku_application
   end
 
   def heroku_build_request
@@ -103,6 +143,11 @@ class DeploymentRequest
     else
       {}
     end
+  end
+
+  def handle_exception(e)
+    Raven.capture_exception(e)
+    command_handler.error_response_for(e.message)
   end
 
   def poller_arguments(heroku_build)

@@ -23,6 +23,7 @@ class HerokuApi
 
   def token_refresh(refresh_token)
     client = Faraday.new(url: "https://id.heroku.com") do |c|
+      c.request :url_encoded
       c.use :instrumentation
       c.use ZipkinTracer::FaradayHandler, "id.heroku.com"
       c.adapter Faraday.default_adapter

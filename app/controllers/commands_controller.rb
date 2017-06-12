@@ -7,19 +7,23 @@ class CommandsController < ApplicationController
 
   def create
     if slack_token_valid?
-      if current_user && current_user.heroku_token
-        command = current_user.create_command_for(params)
-        render json: command.default_response.to_json
-      else
-        command = Command.from_params(params)
-        render json: command.authenticate_heroku_response
-      end
+      render json: handle_command
     else
       render json: {}, status: 404
     end
   end
 
   private
+
+  def handle_command
+    if current_user
+      command = current_user.create_command_for(params)
+      command.default_response.to_json
+    else
+      command = Command.from_params(params)
+      HerokuCommands::Login.new(command).run
+    end
+  end
 
   def say_oops(exception)
     Raven.capture_exception(exception)

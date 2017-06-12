@@ -29,7 +29,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     expect(response[:attachments].size).to eql(1)
     attachment = response[:attachments].first
     expect(attachment[:text]).to eql(
-      "You can deploy: hubot, slash-heroku."
+      "You can deploy: hubot, pipeline-with-multiple-apps, slash-heroku."
     )
   end
 
@@ -52,10 +52,10 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     expect(response[:attachments].size).to eql(1)
     attachment = response[:attachments].first
     expect(attachment[:fallback])
-      .to eql("Heroku app hubot (atmos/hubot)")
+      .to eql("Heroku pipeline hubot (atmos/hubot)")
     expect(attachment[:pretext]).to eql(nil)
     expect(attachment[:text]).to be_nil
-    expect(attachment[:title]).to eql("Application: hubot")
+    expect(attachment[:title]).to eql("Pipeline: hubot")
     expect(attachment[:title_link]).to eql(nil)
 
     heroku_cell = attachment[:fields][0]
@@ -95,7 +95,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     expect(branch_cell[:value]).to eql("production")
   end
 
-  it "tells you to login to GitHub if pipeline:info can't auth" do
+  it "tells you if it can't access the GitHub repository" do
     command = command_for("pipelines:info hubot")
     command.user.github_token = SecureRandom.hex(24)
     command.user.save
@@ -139,7 +139,7 @@ RSpec.describe HerokuCommands::Pipelines, type: :model do
     response = heroku_command.run
 
     expect(response[:response_type]).to eql("in_channel")
-    expect(response[:text]).to include("You're not authenticated with GitHub.")
+    expect(response[:text]).to include("Unable to access this GitHub repository")
   end
   # rubocop:enable Metrics/LineLength
 end

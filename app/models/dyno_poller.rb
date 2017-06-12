@@ -24,8 +24,7 @@ class DynoPoller
 
   def run
     return unless app
-    Rails.logger.info at: "dyno_poller", epoch: epoch
-    if dynos.newer_than?(epoch)
+    if dynos.running?(release_id)
       dyno_restart_completed
       unlock
     elsif expired?

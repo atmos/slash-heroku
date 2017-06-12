@@ -59,9 +59,6 @@ RSpec.describe DynoPoller, type: :model do
     stub_request(:get, "https://api.heroku.com/apps/b0deddbf-cf56-48e4-8c3a-3ea143be2333/dynos") # rubocop:disable Metrics/LineLength
       .to_return(status: 200, body: response_info)
 
-    # Timecop.freeze(Time.zone.utc(2017, 2, 6, 18, 0, 0))
-    Timecop.return
-
     poller = DynoPoller.run(dyno_args)
     expect(poller).to_not be_expired
 

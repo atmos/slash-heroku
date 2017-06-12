@@ -7,6 +7,12 @@
   },
   {
     "created_at": "2016-03-14T07:53:27+00:00",
+    "id": "6c18c922-6eee-451c-b7c6-c76278652ccc",
+    "name": "pipeline-with-multiple-apps",
+    "updated_at": "2016-03-14T07:53:27+00:00"
+  },
+  {
+    "created_at": "2016-03-14T07:53:27+00:00",
     "id": "4c18c922-6eee-451c-b7c6-c76278652ccc",
     "name": "slash-heroku",
     "updated_at": "2016-03-14T07:53:27+00:00"

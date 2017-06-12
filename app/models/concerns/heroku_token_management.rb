@@ -25,7 +25,7 @@ module HerokuTokenManagement
   end
 
   def heroku_configured?
-    !(enc_heroku_token && !enc_heroku_token.empty?).nil?
+    !(heroku_token && enc_heroku_token && !enc_heroku_token.empty?).nil?
   end
 
   def heroku_token=(token)

@@ -6,6 +6,7 @@ RSpec.describe HerokuCommands::Login, type: :model do
 
   it "prints the user's email if properly onboarded" do
     command.user.heroku_token = SecureRandom.hex(32)
+    command.user.heroku_email = "atmos@atmos.org"
     command.user.github_token = SecureRandom.hex(32)
     command.user.save
 
@@ -20,9 +21,12 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect { heroku_command.run }.to_not raise_error
 
     response = heroku_command.run
+
     expect(response[:attachments].size).to eql(1)
     attachment = response[:attachments].first
-    expect(attachment[:text]).to match("atmos@atmos.org")
+    expect(attachment[:fields].size).to eql(2)
+    text = response[:attachments].first[:fields].first[:value]
+    expect(text).to match("atmos@atmos.org")
   end
 
   it "prompts the user to onboard with heroku if not configured" do
@@ -36,9 +40,12 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect { heroku_command.run }.to_not raise_error
 
     response = heroku_command.run
+
     expect(response[:attachments].size).to eql(1)
     attachment = response[:attachments].first
-    expect(attachment[:text]).to match("sign in to Heroku")
+    expect(attachment[:fields].size).to eql(2)
+    text = response[:attachments].first[:fields].first[:value]
+    expect(text).to match("sign in to Heroku")
   end
 
   it "prompts the user to onboard with github if not configured" do
@@ -52,8 +59,11 @@ RSpec.describe HerokuCommands::Login, type: :model do
     expect { heroku_command.run }.to_not raise_error
 
     response = heroku_command.run
+
     expect(response[:attachments].size).to eql(1)
     attachment = response[:attachments].first
-    expect(attachment[:text]).to match("not authenticated with GitHub yet")
+    expect(attachment[:fields].size).to eql(2)
+    text = response[:attachments].first[:fields].last[:value]
+    expect(text).to match("sign in to GitHub")
   end
 end

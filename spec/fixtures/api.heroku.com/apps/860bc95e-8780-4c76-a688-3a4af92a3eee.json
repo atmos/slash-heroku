@@ -5,11 +5,11 @@
     "id": "f9f9cbd7-2970-41ef-8db5-3df7123b041f",
     "name": "cedar-14"
   },
-  "created_at": "2016-03-14T04:52:18Z",
-  "id": "b0deddbf-cf56-48e4-8c3a-3ea143be2333",
-  "git_url": "https://git.heroku.com/beeper-production.git",
+  "created_at": "2016-03-14T04:58:27Z",
+  "id": "860bc95e-8780-4c76-a688-3a4af92a3eee",
+  "git_url": "https://git.heroku.com/beeper-staging-foo.git",
   "maintenance": false,
-  "name": "beeper-production",
+  "name": "beeper-staging-foo",
   "owner": {
     "email": "heroku-tools@herokumanager.com",
     "id": "9bdd664f-3d97-41d5-a946-77eb03cd193f"
@@ -22,13 +22,13 @@
     "id": "706d84bb-9476-46b8-b6a5-1b62670bddf1",
     "name": "heroku-tools"
   },
-  "released_at": "2016-03-16T04:57:32Z",
-  "repo_size": 20667468,
+  "released_at": "2016-03-16T12:45:50Z",
+  "repo_size": 20669358,
   "slug_size": 53199721,
   "stack": {
     "id": "f9f9cbd7-2970-41ef-8db5-3df7123b041f",
     "name": "cedar-14"
   },
-  "updated_at": "2016-03-16T05:50:42Z",
-  "web_url": "http://beeper-production.herokuapp.com/"
+  "updated_at": "2016-03-16T12:45:50Z",
+  "web_url": "http://beeper-staging.herokuapp.com/"
 }

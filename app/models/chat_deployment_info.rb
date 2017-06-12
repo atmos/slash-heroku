@@ -3,7 +3,8 @@ class ChatDeploymentInfo
   include ActiveModel::Model
 
   attr_writer :environment
-  attr_accessor :task, :pipeline_name, :branch, :forced, :hosts, :second_factor
+  attr_accessor :task, :pipeline_name, :branch, :forced, \
+    :application, :second_factor
 
   def self.valid_slug
     "([-_\.0-9a-z]+)"
@@ -18,7 +19,7 @@ class ChatDeploymentInfo
       "(?:\/([^\s]+))?",                              # Branch or sha to deploy
       "(?:\s+(?:to|in|on)\s+",                        # http://i.imgur.com/3KqMoRi.gif
       valid_slug.to_s,                                # Environment to release to
-      "(?:\/([^\s]+))?)?\s*",                         # Host filter to try
+      "(?:\/([^\s]+))?)?\s*",                         # Application in stage to deploy
       "(?:([cbdefghijklnrtuv]{32,64}|\\d{6})?\s*)?$"  # Optional Yubikey
     ]
   end
@@ -39,7 +40,7 @@ class ChatDeploymentInfo
       pipeline_name:    matches[3],
       branch:           matches[4] || "master",
       environment:      matches[5],
-      hosts:            matches[6],
+      application:      matches[6],
       second_factor:    matches[7]
     }
   end

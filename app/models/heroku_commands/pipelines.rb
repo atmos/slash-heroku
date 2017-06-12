@@ -34,16 +34,7 @@ module HerokuCommands
     end
 
     def pipeline_information
-      if pipeline.configured?
-        pipeline_info
-      else
-        {
-          attachments: [
-            { text: "<#{pipeline.heroku_permalink}|" \
-                    "Connect your pipeline to GitHub>" }
-          ]
-        }
-      end
+      pipeline_info
     end
 
     def run_on_subtask
@@ -57,12 +48,13 @@ module HerokuCommands
       else
         default_pipelines_for_user
       end
-    rescue Escobar::GitHub::RepoNotFound
+    rescue Escobar::GitHub::RepoNotFound => e
+      Raven.capture_exception(e)
       unable_to_access_repository_response
     end
 
     def unable_to_access_repository_response
-      response_for("You're not authenticated with GitHub. " \
+      response_for("Unable to access this GitHub repository. " \
                    "<#{command.github_auth_url}|Fix that>.")
     end
 

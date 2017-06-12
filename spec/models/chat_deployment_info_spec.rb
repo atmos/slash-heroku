@@ -12,7 +12,7 @@ RSpec.describe ChatDeploymentInfo, type: :model do
     expect(model).to_not be_forced
     expect(model.pipeline_name).to eql("hubot")
     expect(model.environment).to be_nil
-    expect(model.hosts).to be_nil
+    expect(model.application).to be_nil
     expect(model.second_factor).to be_nil
   end
 
@@ -41,41 +41,41 @@ RSpec.describe ChatDeploymentInfo, type: :model do
   end
 
   it "handles deploying to environments with hosts" do
-    model = ChatDeploymentInfo.from_text("deploy hubot to production/fe1,fe2")
+    model = ChatDeploymentInfo.from_text("deploy hubot to production/fe1")
     expect(model).to be_valid
     expect(model.environment).to eql("production")
-    expect(model.hosts).to eql("fe1,fe2")
+    expect(model.application).to eql("fe1")
   end
 
   # rubocop:disable Metrics/LineLength
-  it "handles deploying branches to environments with hosts" do
-    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1,fe2")
+  it "handles deploying branches to environments with application" do
+    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1")
     expect(model).to be_valid
     expect(model.environment).to eql("production")
-    expect(model.hosts).to eql("fe1,fe2")
+    expect(model.application).to eql("fe1")
     expect(model.branch).to eql("atmos/branch")
   end
 
-  it "handles deploying branches to environments with hosts plus yubikeys" do
-    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1,fe2 ccccccdlnncbtuevhdbctrccukdciveuclhbkvehbeve")
+  it "handles deploying branches to environments with application plus yubikeys" do
+    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1 ccccccdlnncbtuevhdbctrccukdciveuclhbkvehbeve")
     expect(model).to be_valid
     expect(model.environment).to eql("production")
-    expect(model.hosts).to eql("fe1,fe2")
+    expect(model.application).to eql("fe1")
     expect(model.branch).to eql("atmos/branch")
     expect(model.second_factor).to eql("ccccccdlnncbtuevhdbctrccukdciveuclhbkvehbeve")
   end
 
   it "handles deploying branches to environments with hosts plus authenticator tokens" do
-    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1,fe2 123456")
+    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1 123456")
     expect(model).to be_valid
     expect(model.environment).to eql("production")
-    expect(model.hosts).to eql("fe1,fe2")
+    expect(model.application).to eql("fe1")
     expect(model.branch).to eql("atmos/branch")
     expect(model.second_factor).to eql("123456")
   end
 
   it "doesn't match on malformed yubikeys" do
-    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1,fe2 burgers")
+    model = ChatDeploymentInfo.from_text("deploy hubot/atmos/branch to production/fe1 burgers")
     expect(model).to_not be_valid
   end
 

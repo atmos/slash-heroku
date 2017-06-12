@@ -7,9 +7,9 @@
   },
   "created_at": "2016-03-14T04:58:27Z",
   "id": "760bc95e-8780-4c76-a688-3a4af92a3eee",
-  "git_url": "https://git.heroku.com/slash-heroku-staging.git",
+  "git_url": "https://git.heroku.com/beeper-staging.git",
   "maintenance": false,
-  "name": "slash-heroku-staging",
+  "name": "beeper-staging",
   "owner": {
     "email": "heroku-tools@herokumanager.com",
     "id": "9bdd664f-3d97-41d5-a946-77eb03cd193f"
@@ -30,5 +30,5 @@
     "name": "cedar-14"
   },
   "updated_at": "2016-03-16T12:45:50Z",
-  "web_url": "http://slash-heroku-staging.herokuapp.com/"
+  "web_url": "http://beeper-staging.herokuapp.com/"
 }

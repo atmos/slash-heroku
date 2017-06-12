@@ -16,12 +16,29 @@ RSpec.describe "SlashHeroku /commands", type: :request do
     post "/commands", params: default_params(text: "ps")
     expect(status).to eql(200)
     response_body = JSON.parse(body)
-    expect(response_body["response_type"]).to eql("in_channel")
+    expect(response_body["response_type"]).to eql("ephemeral")
 
+    text = "Connect your Heroku account"
     link = "Please <https://www.example.com/auth/slack?origin=" \
            "#{Command.last.encoded_origin_hash}&team=T123YG08V|" \
            "sign in to Heroku>."
-    expect(response_body["text"]).to eql(link)
+    attachment = response_body["attachments"].first
+    attach_text = attachment["fields"].first["value"]
+    expect(response_body["text"]).to eql(text)
+    expect(attach_text).to eql(link)
+  end
+
+  it "returns an oops message if the endpoint 500s" do
+    create_atmos
+    allow(Command).to receive(:create).and_raise("Uninitialized Constant")
+
+    post "/commands", params: default_params(text: "ps")
+    expect(status).to eql(200)
+    response_body = JSON.parse(body)
+    expect(response_body["response_type"]).to eql("ephemeral")
+
+    message = "Oops, something went wrong."
+    expect(response_body["text"]).to eql(message)
   end
 
   it "returns an oops message if the endpoint 500s" do

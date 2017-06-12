@@ -25,20 +25,13 @@ class Command < ApplicationRecord
     "https://#{ENV['HOSTNAME']}/auth"
   end
 
-  def slack_auth_url
+  def heroku_auth_url
     "#{auth_url_prefix}/slack?origin=#{encoded_origin_hash(:heroku)}" \
       "&team=#{team_id}"
   end
 
   def github_auth_url
     "#{auth_url_prefix}/github?origin=#{encoded_origin_hash(:github)}"
-  end
-
-  def authenticate_heroku_response
-    {
-      response_type: "in_channel",
-      text: "Please <#{slack_auth_url}|sign in to Heroku>."
-    }
   end
 
   def origin_hash(provider_name)
@@ -53,6 +46,15 @@ class Command < ApplicationRecord
   def encoded_origin_hash(provider_name = :heroku)
     data = JSON.dump(origin_hash(provider_name))
     Base64.encode64(data).split("\n").join("")
+  end
+
+  def add_sentry_context
+    Raven.user_context(id:       user.id,
+                       slack_id: user.slack_user_id,
+                       username: user.slack_user_name)
+    Raven.extra_context(text:    command_text,
+                        channel: channel_name,
+                        command_id: id)
   end
 
   private

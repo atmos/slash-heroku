@@ -8,15 +8,22 @@ module Responses
       @pipeline_name = pipeline_name
     end
 
+    def repo_name
+      @repo_name ||= begin
+                       pipeline.github_repository
+                     rescue Escobar::GitHub::RepoNotFound
+                       nil
+                     end
+    end
+
     # rubocop:disable Metrics/MethodLength
     def response
-      repo_name = pipeline.github_repository
       {
         response_type: "in_channel",
         attachments: [
           {
-            title: "Application: #{pipeline_name}",
-            fallback: "Heroku app #{pipeline_name} (#{repo_name})",
+            title: "Pipeline: #{pipeline_name}",
+            fallback: "Heroku pipeline #{pipeline_name} (#{repo_name})",
             color: HerokuCommands::HerokuCommand::COLOR,
             fields: [
               {
@@ -68,8 +75,12 @@ module Responses
     end
 
     def repository_markup
-      name_with_owner = pipeline.github_repository
-      "<https://github.com/#{name_with_owner}|#{name_with_owner}>"
+      if repo_name
+        "<https://github.com/#{repo_name}|#{repo_name}>"
+      else
+        "<#{pipeline.heroku_permalink}|" \
+          "Connect your pipeline to GitHub>"
+      end
     end
 
     def app_names_for_pipeline_environment(name)

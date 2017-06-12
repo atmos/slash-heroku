@@ -3,6 +3,16 @@ require "rails_helper"
 RSpec.describe User, type: :model do
   let(:user) { create_atmos }
 
+  def configure_for_heroku(user)
+    user.heroku_token = SecureRandom.hex(24)
+    user.heroku_refresh_token = SecureRandom.hex(24)
+    user.heroku_expires_at = Time.now.utc + 1.day
+  end
+
+  def configure_for_github(user)
+    user.github_token = SecureRandom.hex(24)
+  end
+
   it "creates action made by the user" do
     expect do
       params = action_params_for("environment", "staging")
@@ -21,22 +31,22 @@ RSpec.describe User, type: :model do
 
   describe "onboarding" do
     it "requires a non-empty github_token" do
-      user.github_token = SecureRandom.hex(24)
+      configure_for_github(user)
 
       expect(user).to be_github_configured
       expect(user).to_not be_onboarded
     end
 
-    it "require a non-empty heroku_token" do
-      user.heroku_token = SecureRandom.hex(24)
+    it "require a non-empty heroku_token and a valid heroku_refresh_token" do
+      configure_for_heroku(user)
 
       expect(user).to be_heroku_configured
       expect(user).to_not be_onboarded
     end
 
     it "is complete if a github and heroku are configured" do
-      user.heroku_token = SecureRandom.hex(24)
-      user.github_token = SecureRandom.hex(24)
+      configure_for_heroku(user)
+      configure_for_github(user)
 
       expect(user).to be_onboarded
     end

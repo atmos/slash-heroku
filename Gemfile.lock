@@ -43,7 +43,7 @@ GEM
       rack-test (>= 0.5.4)
       xpath (~> 2.0)
     chunky_png (1.3.7)
-    coal_car (0.2.6)
+    coal_car (0.2.7)
       activesupport (~> 5.0)
       faraday (~> 0.9)
       faraday_middleware (~> 0.10.0)
@@ -90,7 +90,7 @@ GEM
       dotenv (= 2.1.1)
       railties (>= 4.0, < 5.1)
     erubis (2.7.0)
-    escobar (0.3.10)
+    escobar (0.3.14)
       faraday (~> 0.9.2)
       netrc (~> 0.11)
       zipkin-tracer (~> 0.18)
@@ -312,7 +312,7 @@ DEPENDENCIES
   coffee-rails (~> 4.1.0)
   compass-rails
   dotenv-rails
-  escobar (= 0.3.10)
+  escobar (= 0.3.14)
   foreman
   jbuilder (~> 2.0)
   jquery-rails

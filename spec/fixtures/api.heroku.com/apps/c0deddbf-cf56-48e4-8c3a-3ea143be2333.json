@@ -6,10 +6,10 @@
     "name": "cedar-14"
   },
   "created_at": "2016-03-14T04:52:18Z",
-  "id": "b0deddbf-cf56-48e4-8c3a-3ea143be2333",
-  "git_url": "https://git.heroku.com/beeper-production.git",
+  "id": "c0deddbf-cf56-48e4-8c3a-3ea143be2333",
+  "git_url": "https://git.heroku.com/beeper-production-foo.git",
   "maintenance": false,
-  "name": "beeper-production",
+  "name": "beeper-production-foo",
   "owner": {
     "email": "heroku-tools@herokumanager.com",
     "id": "9bdd664f-3d97-41d5-a946-77eb03cd193f"

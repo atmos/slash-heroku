@@ -27,8 +27,12 @@ module HerokuCommands
     end
 
     def deploy_application
-      if pipeline_name && !pipeline
+      if pipeline_missing?
         response_for("Unable to find a pipeline called #{pipeline_name}")
+      elsif pipeline_environment_missing?
+        response_for(error_message_for_unknown_pipeline_environment)
+      elsif github_repository_missing?
+        response_for(error_message_for_github_repository_missing)
       else
         DeploymentRequest.process(self)
       end
@@ -36,6 +40,18 @@ module HerokuCommands
 
     def deployment_complete_message(_payload, _sha)
       {}
+    end
+
+    def pipeline_missing?
+      pipeline_name && pipeline.nil?
+    end
+
+    def pipeline_environment_missing?
+      pipeline.environments[environment].nil?
+    end
+
+    def github_repository_missing?
+      pipeline.github_repository.blank?
     end
 
     def run_on_subtask
@@ -58,6 +74,15 @@ module HerokuCommands
 
     def pipeline
       user.pipeline_for(pipeline_name)
+    end
+
+    def error_message_for_unknown_pipeline_environment
+      "Unable to find an environment called #{environment}. " \
+        "Available environments: #{pipeline.sorted_environments.join(', ')}"
+    end
+
+    def error_message_for_github_repository_missing
+      "<#{pipeline.heroku_permalink}|Connect your pipeline to GitHub>"
     end
   end
 end

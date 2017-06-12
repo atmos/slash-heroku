@@ -45,8 +45,9 @@ module HerokuCommands
     def error_response_for_escobar_two_factor(error)
       {
         attachments: [
-          { text: "<#{error.dashboard_url}|Unlock " \
-                  "#{error.build_request.app.name}>" }
+          { text: "<#{error.dashboard_url}|" \
+                  "#{error.build_request.app.name}> requires a second factor " \
+                  "for access." }
         ]
       }
     end

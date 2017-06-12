@@ -44,6 +44,10 @@ class User < ApplicationRecord
     heroku_configured? && github_configured?
   end
 
+  def onboarding?
+    heroku_configured? || github_configured?
+  end
+
   def pipelines
     return unless onboarded?
     @pipelines ||= Escobar::Client.new(github_token, heroku_token)
@@ -55,15 +59,8 @@ class User < ApplicationRecord
   end
 
   def create_command_for(params)
-    command = commands.create(
-      channel_id: params[:channel_id],
-      channel_name: params[:channel_name],
-      command: params[:command],
-      command_text: params[:text],
-      response_url: params[:response_url],
-      team_id: params[:team_id],
-      team_domain: params[:team_domain]
-    )
+    command = Command.from_params(params)
+    commands << command
     CommandExecutorJob.perform_later(command_id: command.id)
     YubikeyExpireJob.set(wait: 10.seconds).perform_later(command_id: command.id)
     command

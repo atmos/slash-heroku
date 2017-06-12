@@ -1,0 +1,54 @@
+[
+  {
+    "created_at": "2016-03-14T07:53:48+00:00",
+    "app": {
+      "id": "b0deddbf-cf56-48e4-8c3a-3ea143be2333"
+    },
+    "id": "e539d5b3-2ede-4e51-80e3-3b5b47678bf4",
+    "pipeline": {
+      "id": "6c18c922-6eee-451c-b7c6-c76278652ccc",
+      "name": "pipeline-with-multiple-apps"
+    },
+    "stage": "production",
+    "updated_at": "2016-03-14T07:53:48+00:00"
+  },
+  {
+    "created_at": "2016-03-14T07:53:48+00:00",
+    "app": {
+      "id": "c0deddbf-cf56-48e4-8c3a-3ea143be2333"
+    },
+    "id": "f539d5b3-2ede-4e51-80e3-3b5b47678bf4",
+    "pipeline": {
+      "id": "6c18c922-6eee-451c-b7c6-c76278652ccc",
+      "name": "pipeline-with-multiple-apps"
+    },
+    "stage": "production",
+    "updated_at": "2016-03-14T07:53:48+00:00"
+  },
+  {
+    "created_at": "2016-03-14T07:53:56+00:00",
+    "app": {
+      "id": "760bc95e-8780-4c76-a688-3a4af92a3eee"
+    },
+    "id": "69648ef0-80f1-4311-b81e-0003d25d1fd6",
+    "pipeline": {
+      "id": "6c18c922-6eee-451c-b7c6-c76278652ccc",
+      "name": "pipeline-with-multiple-apps"
+    },
+    "stage": "staging",
+    "updated_at": "2016-03-14T07:53:56+00:00"
+  },
+  {
+    "created_at": "2016-03-14T07:53:56+00:00",
+    "app": {
+      "id": "860bc95e-8780-4c76-a688-3a4af92a3eee"
+    },
+    "id": "79648ef0-80f1-4311-b81e-0003d25d1fd6",
+    "pipeline": {
+      "id": "6c18c922-6eee-451c-b7c6-c76278652ccc",
+      "name": "pipeline-with-multiple-apps"
+    },
+    "stage": "staging",
+    "updated_at": "2016-03-14T07:53:56+00:00"
+  }
+]

@@ -21,14 +21,6 @@ RSpec.describe HerokuCommands::Releases, type: :model do
     stub_pipelines_command(command.user.heroku_token)
     stub_releases(command.user.heroku_token)
 
-    response_info = fixture_data("kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
-    stub_request(:get, "https://kolkrabbi.com/pipelines/4c18c922-6eee-451c-b7c6-c76278652ccc/repository")
-      .to_return(status: 200, body: response_info)
-
-    response_info = fixture_data("api.github.com/repos/atmos/slash-heroku/deployments")
-    stub_request(:get, "https://api.github.com/repos/atmos/slash-heroku/deployments")
-      .to_return(status: 200, body: response_info)
-
     expect(command.task).to eql("releases")
     expect(command.subtask).to eql("default")
 
